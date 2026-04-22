@@ -51,6 +51,13 @@
                 <q-item-section>Crates</q-item-section>
             </q-item>
 
+            <q-item clickable :to="'/junk'">
+                <q-item-section avatar>
+                    <q-icon name="widgets" />
+                </q-item-section>
+                <q-item-section>Junk</q-item-section>
+            </q-item>
+
             <q-item clickable :to="'/image-test'">
                 <q-item-section avatar>
                     <q-icon name="image" />

@@ -81,21 +81,22 @@
 </template>
 
 <script setup>
-import { ref, computed, onBeforeUnmount } from 'vue'
+import { computed } from 'vue'
+import { useCamera } from 'src/composables/useCamera'
 
-const supported = typeof window !== 'undefined'
-    && !!window.isSecureContext
-    && !!( navigator.mediaDevices && navigator.mediaDevices.getUserMedia )
-
-const videoEl     = ref( null )
-const streaming   = ref( false )
-const error       = ref( null )
-const devices     = ref( [] )
-const deviceId    = ref( null )
-const lastCapture = ref( null )
-
-let currentStream  = null
-let currentBlobUrl = null
+const {
+    videoEl,
+    streaming,
+    error,
+    devices,
+    deviceId,
+    lastCapture,
+    supported,
+    startCamera,
+    stopCamera,
+    capture,
+    restartIfStreaming,
+} = useCamera()
 
 const deviceOptions = computed( () =>
     devices.value.map( ( d, i ) => ( {
@@ -103,118 +104,6 @@ const deviceOptions = computed( () =>
         value: d.deviceId,
     } ) ),
 )
-
-function formatBytes ( bytes ) {
-    if ( bytes < 1024 )         return `${ bytes } B`
-    if ( bytes < 1024 * 1024 )  return `${ Math.round( bytes / 1024 ) } KB`
-    return `${ ( bytes / ( 1024 * 1024 ) ).toFixed( 2 ) } MB`
-}
-
-function buildConstraints () {
-    const video = {
-        width:  { ideal: 1920 },
-        height: { ideal: 1080 },
-    }
-    if ( deviceId.value ) {
-        video.deviceId = { exact: deviceId.value }
-    }
-    return { video, audio: false }
-}
-
-async function enumerateDevices () {
-    try {
-        const all = await navigator.mediaDevices.enumerateDevices()
-        devices.value = all.filter( ( d ) => d.kind === 'videoinput' )
-    }
-    catch {
-        devices.value = []
-    }
-}
-
-function stopCamera () {
-    if ( currentStream ) {
-        currentStream.getTracks().forEach( ( t ) => t.stop() )
-        currentStream = null
-    }
-    if ( videoEl.value ) {
-        videoEl.value.srcObject = null
-    }
-    streaming.value = false
-}
-
-async function startCamera () {
-    error.value = null
-    try {
-        stopCamera()
-        const stream = await navigator.mediaDevices.getUserMedia( buildConstraints() )
-        currentStream = stream
-        if ( videoEl.value ) {
-            videoEl.value.srcObject = stream
-        }
-        streaming.value = true
-        await enumerateDevices()
-    }
-    catch ( err ) {
-        error.value = `${ err.name }: ${ err.message }`
-        streaming.value = false
-    }
-}
-
-async function restartIfStreaming () {
-    if ( streaming.value ) {
-        await startCamera()
-    }
-}
-
-async function capture () {
-    if ( !videoEl.value || !currentStream ) return
-
-    const video        = videoEl.value
-    const sourceWidth  = video.videoWidth
-    const sourceHeight = video.videoHeight
-    if ( !sourceWidth || !sourceHeight ) {
-        error.value = 'Video not ready yet — try again in a moment.'
-        return
-    }
-
-    const side = Math.min( sourceWidth, sourceHeight )
-    const sx = ( sourceWidth  - side ) / 2
-    const sy = ( sourceHeight - side ) / 2
-    const target = 1200
-
-    const canvas = document.createElement( 'canvas' )
-    canvas.width  = target
-    canvas.height = target
-    const ctx = canvas.getContext( '2d' )
-    ctx.drawImage( video, sx, sy, side, side, 0, 0, target, target )
-
-    const blob = await new Promise( ( resolve ) => {
-        canvas.toBlob( resolve, 'image/webp', 0.8 )
-    } )
-
-    if ( !blob ) {
-        error.value = 'WebP encoding failed in this browser.'
-        return
-    }
-
-    if ( currentBlobUrl ) {
-        URL.revokeObjectURL( currentBlobUrl )
-    }
-    currentBlobUrl = URL.createObjectURL( blob )
-
-    lastCapture.value = {
-        url:  currentBlobUrl,
-        size: formatBytes( blob.size ),
-    }
-}
-
-onBeforeUnmount( () => {
-    stopCamera()
-    if ( currentBlobUrl ) {
-        URL.revokeObjectURL( currentBlobUrl )
-        currentBlobUrl = null
-    }
-} )
 </script>
 
 <style scoped>
