@@ -1,0 +1,387 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>CrateMate — camera smoke test</title>
+    <style>
+        :root {
+            color-scheme: light dark;
+        }
+        body {
+            font-family: system-ui, -apple-system, sans-serif;
+            margin: 0;
+            padding: 1rem;
+            max-width: 1200px;
+            line-height: 1.4;
+        }
+        h1 { margin-top: 0; font-size: 1.25rem; }
+        h2 { font-size: 1rem; margin: 1.25rem 0 0.5rem; }
+        p.hint { color: #666; font-size: 0.9rem; margin-top: 0.25rem; }
+        #controls {
+            display: flex;
+            gap: 0.5rem;
+            flex-wrap: wrap;
+            align-items: center;
+            margin: 0.5rem 0 1rem;
+        }
+        button, select {
+            padding: 0.5rem 0.75rem;
+            font-size: 0.9rem;
+            border: 1px solid #888;
+            background: #f5f5f5;
+            cursor: pointer;
+            border-radius: 4px;
+        }
+        button:disabled { opacity: 0.5; cursor: not-allowed; }
+        #status {
+            padding: 0.5rem 0.75rem;
+            background: #eef;
+            border-left: 3px solid #88a;
+            margin-bottom: 1rem;
+            font-size: 0.9rem;
+        }
+        #status.error { background: #fee; border-color: #a44; }
+        #status.ok    { background: #efe; border-color: #4a4; }
+        .grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+        }
+        @media ( max-width: 720px ) {
+            .grid { grid-template-columns: 1fr; }
+        }
+        video, #lastCapture {
+            width: 100%;
+            max-width: 600px;
+            background: #000;
+            display: block;
+            border-radius: 4px;
+            aspect-ratio: 4 / 3;
+            object-fit: contain;
+        }
+        #lastCapture { aspect-ratio: 1 / 1; object-fit: cover; }
+        a.download {
+            display: inline-block;
+            margin-top: 0.5rem;
+            font-size: 0.85rem;
+        }
+        pre {
+            background: #f5f5f5;
+            border: 1px solid #ddd;
+            padding: 0.75rem;
+            font-size: 0.8rem;
+            overflow: auto;
+            border-radius: 4px;
+            white-space: pre-wrap;
+            word-break: break-word;
+        }
+        @media ( prefers-color-scheme: dark ) {
+            body { background: #1a1a1a; color: #ddd; }
+            p.hint { color: #999; }
+            button, select { background: #2a2a2a; color: #ddd; border-color: #555; }
+            pre { background: #222; border-color: #333; }
+            #status { background: #223; border-color: #557; }
+            #status.error { background: #322; border-color: #a66; }
+            #status.ok    { background: #232; border-color: #6a6; }
+        }
+    </style>
+</head>
+<body>
+    <h1>CrateMate — camera smoke test</h1>
+    <p class="hint">
+        Standalone page served by DDEV. No Quasar, no Vue — just <code>getUserMedia</code>.
+        Click <em>Start camera</em>, allow the permission prompt, then <em>Capture</em>
+        to produce a 1200 × 1200 WebP (matches the CrateMate image spec).
+    </p>
+
+    <div id="controls">
+        <button id="startBtn">Start camera</button>
+        <button id="stopBtn" disabled>Stop</button>
+        <button id="captureBtn" disabled>Capture (1200 × 1200 WebP)</button>
+        <select id="deviceSelect" disabled></select>
+        <select id="resolutionSelect" title="Requested source resolution (ideal — browser may clamp)">
+            <option value="auto">Resolution: auto (browser default)</option>
+            <option value="640x480">640 × 480 (VGA)</option>
+            <option value="1280x720">1280 × 720 (HD)</option>
+            <option value="1920x1080" selected>1920 × 1080 (Full HD)</option>
+            <option value="3840x2160">3840 × 2160 (4K)</option>
+            <option value="max">Max available</option>
+        </select>
+    </div>
+
+    <div id="status">Idle. Click <em>Start camera</em>.</div>
+
+    <div class="grid">
+        <div>
+            <h2>Live preview</h2>
+            <video id="preview" autoplay playsinline muted></video>
+        </div>
+        <div>
+            <h2>Last capture</h2>
+            <img id="lastCapture" alt="Last captured frame" />
+            <a id="download" class="download" style="display:none" download="cratemate-capture.webp">Download</a>
+        </div>
+    </div>
+
+    <h2>Diagnostics</h2>
+    <pre id="diagnostics"></pre>
+
+    <script>
+        const $ = ( id ) => document.getElementById( id )
+        const startBtn      = $( 'startBtn' )
+        const stopBtn       = $( 'stopBtn' )
+        const captureBtn    = $( 'captureBtn' )
+        const deviceSelect     = $( 'deviceSelect' )
+        const resolutionSelect = $( 'resolutionSelect' )
+        const statusEl         = $( 'status' )
+        const videoEl       = $( 'preview' )
+        const lastCaptureEl = $( 'lastCapture' )
+        const downloadEl    = $( 'download' )
+        const diagnosticsEl = $( 'diagnostics' )
+
+        const diag = {}
+        let currentStream  = null
+        let currentBlobUrl = null
+
+        function setStatus ( message, kind ) {
+            statusEl.textContent = message
+            statusEl.className   = kind || ''
+        }
+
+        function refreshDiagnostics () {
+            diagnosticsEl.textContent = JSON.stringify( diag, null, 2 )
+        }
+
+        function probeCanvasFormats () {
+            const c = document.createElement( 'canvas' )
+            c.width  = 4
+            c.height = 4
+            const ctx = c.getContext( '2d' )
+            ctx.fillStyle = '#abc'
+            ctx.fillRect( 0, 0, 4, 4 )
+            const results = {}
+            for ( const type of [ 'image/webp', 'image/jpeg', 'image/png' ] ) {
+                const dataUrl = c.toDataURL( type, 0.8 )
+                results[ type ] = dataUrl.startsWith( `data:${ type }` )
+            }
+            return results
+        }
+
+        async function populateDevices () {
+            try {
+                const devices = await navigator.mediaDevices.enumerateDevices()
+                const cams    = devices.filter( ( d ) => d.kind === 'videoinput' )
+                const prev    = deviceSelect.value
+                deviceSelect.innerHTML = ''
+                cams.forEach( ( d, i ) => {
+                    const opt = document.createElement( 'option' )
+                    opt.value       = d.deviceId
+                    opt.textContent = d.label || `Camera ${ i + 1 } (label hidden until permission granted)`
+                    deviceSelect.appendChild( opt )
+                } )
+                if ( prev && cams.some( ( d ) => d.deviceId === prev ) ) {
+                    deviceSelect.value = prev
+                }
+                deviceSelect.disabled = cams.length <= 1
+                diag.videoInputs = cams.map( ( d, i ) => ( {
+                    index: i,
+                    label: d.label || '(hidden until permission granted)',
+                    deviceId: d.deviceId ? `${ d.deviceId.slice( 0, 8 ) }…` : '',
+                } ) )
+            }
+            catch ( err ) {
+                diag.enumerateDevicesError = { name: err.name, message: err.message }
+            }
+            refreshDiagnostics()
+        }
+
+        function stopCamera () {
+            if ( currentStream ) {
+                currentStream.getTracks().forEach( ( t ) => t.stop() )
+                currentStream = null
+            }
+            videoEl.srcObject = null
+            startBtn.disabled   = false
+            stopBtn.disabled    = true
+            captureBtn.disabled = true
+        }
+
+        function buildConstraints () {
+            const deviceId   = deviceSelect.value
+            const resolution = resolutionSelect.value
+
+            const video = {}
+            if ( deviceId ) {
+                video.deviceId = { exact: deviceId }
+            }
+
+            if ( resolution === 'max' ) {
+                video.width  = { ideal: 4096 }
+                video.height = { ideal: 4096 }
+            }
+            else if ( resolution !== 'auto' ) {
+                const [ w, h ] = resolution.split( 'x' ).map( Number )
+                video.width  = { ideal: w }
+                video.height = { ideal: h }
+            }
+
+            return {
+                video: Object.keys( video ).length > 0 ? video : true,
+                audio: false,
+            }
+        }
+
+        async function startCamera () {
+            try {
+                setStatus( 'Requesting camera…' )
+                stopCamera()
+                const constraints = buildConstraints()
+                const stream = await navigator.mediaDevices.getUserMedia( constraints )
+                currentStream     = stream
+                videoEl.srcObject = stream
+
+                const [ track ]    = stream.getVideoTracks()
+                const settings     = track.getSettings()
+                const capabilities = ( typeof track.getCapabilities === 'function' )
+                    ? track.getCapabilities()
+                    : '(getCapabilities() not supported in this browser)'
+
+                diag.activeTrack = {
+                    label: track.label,
+                    requested: constraints.video === true ? '(unconstrained)' : constraints.video,
+                    settings,
+                    capabilities,
+                }
+                refreshDiagnostics()
+
+                await populateDevices()
+
+                startBtn.disabled   = true
+                stopBtn.disabled    = false
+                captureBtn.disabled = false
+
+                setStatus(
+                    `Running at ${ settings.width } × ${ settings.height } · ${ track.label || 'unlabeled device' }`,
+                    'ok',
+                )
+            }
+            catch ( err ) {
+                diag.lastStartError = {
+                    name: err.name,
+                    message: err.message,
+                    constraint: err.constraint || null,
+                }
+                refreshDiagnostics()
+                setStatus( `getUserMedia failed: ${ err.name } — ${ err.message }`, 'error' )
+                startBtn.disabled = false
+            }
+        }
+
+        async function encode ( canvas, type, quality ) {
+            return await new Promise( ( resolve ) => {
+                canvas.toBlob( resolve, type, quality )
+            } )
+        }
+
+        async function capture () {
+            if ( !currentStream ) return
+
+            const sourceWidth  = videoEl.videoWidth
+            const sourceHeight = videoEl.videoHeight
+            if ( !sourceWidth || !sourceHeight ) {
+                setStatus( 'Video not ready yet — try again in a moment.', 'error' )
+                return
+            }
+
+            const side = Math.min( sourceWidth, sourceHeight )
+            const sx   = ( sourceWidth  - side ) / 2
+            const sy   = ( sourceHeight - side ) / 2
+
+            const target = 1200
+            const canvas = document.createElement( 'canvas' )
+            canvas.width  = target
+            canvas.height = target
+            const ctx = canvas.getContext( '2d' )
+            ctx.drawImage( videoEl, sx, sy, side, side, 0, 0, target, target )
+
+            const webpBlob = await encode( canvas, 'image/webp', 0.8 )
+            const jpegBlob = await encode( canvas, 'image/jpeg', 0.85 )
+
+            if ( !webpBlob ) {
+                setStatus( 'WebP encoding failed — your browser may not encode WebP.', 'error' )
+                return
+            }
+
+            if ( currentBlobUrl ) URL.revokeObjectURL( currentBlobUrl )
+            currentBlobUrl = URL.createObjectURL( webpBlob )
+            lastCaptureEl.src         = currentBlobUrl
+            downloadEl.href           = currentBlobUrl
+            downloadEl.style.display  = 'inline-block'
+
+            diag.lastCapture = {
+                source: `${ sourceWidth } × ${ sourceHeight }`,
+                cropSide: side,
+                output: `${ target } × ${ target }`,
+                webp: webpBlob
+                    ? { bytes: webpBlob.size, kb: Math.round( webpBlob.size / 1024 ) }
+                    : 'encoding failed',
+                jpeg: jpegBlob
+                    ? { bytes: jpegBlob.size, kb: Math.round( jpegBlob.size / 1024 ) }
+                    : 'encoding failed',
+                webpVsJpegRatio: ( webpBlob && jpegBlob )
+                    ? ( webpBlob.size / jpegBlob.size ).toFixed( 3 )
+                    : null,
+                takenAt: new Date().toISOString(),
+            }
+            refreshDiagnostics()
+            setStatus(
+                `Captured: WebP ${ Math.round( webpBlob.size / 1024 ) } KB, JPEG ${ Math.round( jpegBlob.size / 1024 ) } KB`,
+                'ok',
+            )
+        }
+
+        async function init () {
+            diag.secureContext   = window.isSecureContext
+            diag.origin          = window.location.origin
+            diag.userAgent       = navigator.userAgent
+            diag.hasMediaDevices = !!( navigator.mediaDevices && navigator.mediaDevices.getUserMedia )
+            diag.canvasFormats   = probeCanvasFormats()
+
+            if ( !diag.secureContext ) {
+                setStatus(
+                    'Not a secure context — getUserMedia will not work. Load via https:// or localhost.',
+                    'error',
+                )
+                startBtn.disabled = true
+            }
+            if ( !diag.hasMediaDevices ) {
+                setStatus( 'navigator.mediaDevices.getUserMedia is unavailable in this browser.', 'error' )
+                startBtn.disabled = true
+            }
+
+            refreshDiagnostics()
+            await populateDevices()
+
+            if ( navigator.mediaDevices && typeof navigator.mediaDevices.addEventListener === 'function' ) {
+                navigator.mediaDevices.addEventListener( 'devicechange', populateDevices )
+            }
+        }
+
+        startBtn.addEventListener( 'click', startCamera )
+        stopBtn.addEventListener( 'click', () => {
+            stopCamera()
+            setStatus( 'Stopped.' )
+        } )
+        captureBtn.addEventListener( 'click', capture )
+        deviceSelect.addEventListener( 'change', () => {
+            if ( currentStream ) startCamera()
+        } )
+        resolutionSelect.addEventListener( 'change', () => {
+            if ( currentStream ) startCamera()
+        } )
+
+        init()
+    </script>
+</body>
+</html>

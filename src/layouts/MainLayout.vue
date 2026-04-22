@@ -14,6 +14,18 @@
             <q-toolbar-title>
                 Cratemate
             </q-toolbar-title>
+
+            <div v-if="authStore.user" class="row items-center q-gutter-sm">
+                <div class="text-body2">{{ authStore.user.name }}</div>
+                <q-btn
+                    flat
+                    dense
+                    round
+                    icon="logout"
+                    aria-label="Log out"
+                    @click="onLogout"
+                />
+            </div>
         </q-toolbar>
     </q-header>
 
@@ -30,6 +42,13 @@
                     <q-icon name="dashboard" />
                 </q-item-section>
                 <q-item-section>Dashboard</q-item-section>
+            </q-item>
+
+            <q-item clickable :to="'/crates'">
+                <q-item-section avatar>
+                    <q-icon name="inventory_2" />
+                </q-item-section>
+                <q-item-section>Crates</q-item-section>
             </q-item>
 
             <q-item clickable :to="'/image-test'">
@@ -49,10 +68,19 @@
 
 <script setup>
 import { ref } from 'vue'
+import { useRouter } from 'vue-router'
+import { useAuthStore } from 'src/stores/auth-store'
 
 const leftDrawerOpen = ref( false )
+const authStore      = useAuthStore()
+const router         = useRouter()
 
 function toggleLeftDrawer () {
     leftDrawerOpen.value = !leftDrawerOpen.value
+}
+
+async function onLogout () {
+    await authStore.logout()
+    router.replace( '/login' )
 }
 </script>
