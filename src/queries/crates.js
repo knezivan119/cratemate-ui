@@ -1,6 +1,7 @@
 import { computed, unref } from 'vue'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/vue-query'
 import { apiFetch } from 'src/boot/api'
+import { junkKeys } from 'src/queries/junk'
 
 export const crateKeys = {
     all: [ 'crates' ],
@@ -74,8 +75,11 @@ export function useDeleteCrate () {
     const qc = useQueryClient()
     return useMutation( {
         mutationFn: ( id ) => apiFetch( `/crates/${ id }`, { method: 'DELETE' } ),
+        // The API cascades soft-delete to descendants and their junk, so junk queries
+        // (flat list, in-crate count, in-crate gallery) all need invalidation too.
         onSuccess: () => {
             qc.invalidateQueries( { queryKey: crateKeys.all } )
+            qc.invalidateQueries( { queryKey: junkKeys.all } )
         },
     } )
 }

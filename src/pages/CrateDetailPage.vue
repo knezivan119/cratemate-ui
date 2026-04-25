@@ -1,6 +1,6 @@
 <template>
 <q-page padding class="q-pb-xl">
-    <div class="row items-center q-mb-md">
+    <div class="row items-center q-mb-md no-wrap">
         <q-btn
             flat
             dense
@@ -10,9 +10,49 @@
             :to="parentRoute"
             aria-label="Back"
         />
-        <div class="text-h5 ellipsis">
+        <div class="text-h5 ellipsis col">
             {{ crate?.name || 'Loading…' }}
         </div>
+        <q-btn
+            v-if="crate"
+            flat
+            dense
+            round
+            icon="more_vert"
+            aria-label="Crate actions"
+        >
+            <q-menu>
+                <q-list style="min-width: 220px">
+                    <q-item clickable v-close-popup @click="openEdit">
+                        <q-item-section avatar><q-icon name="edit" /></q-item-section>
+                        <q-item-section>Rename / Edit</q-item-section>
+                    </q-item>
+                    <q-item clickable v-close-popup @click="openMove">
+                        <q-item-section avatar><q-icon name="folder_open" /></q-item-section>
+                        <q-item-section>Move to another crate</q-item-section>
+                    </q-item>
+                    <q-item
+                        v-if="crate.parent_id"
+                        clickable
+                        v-close-popup
+                        @click="moveToRoot"
+                    >
+                        <q-item-section avatar><q-icon name="vertical_align_top" /></q-item-section>
+                        <q-item-section>Make a root crate</q-item-section>
+                    </q-item>
+                    <q-separator />
+                    <q-item
+                        clickable
+                        v-close-popup
+                        class="text-negative"
+                        @click="confirmDelete"
+                    >
+                        <q-item-section avatar><q-icon name="delete" color="negative" /></q-item-section>
+                        <q-item-section>Delete</q-item-section>
+                    </q-item>
+                </q-list>
+            </q-menu>
+        </q-btn>
     </div>
 
     <div v-if="crate?.type" class="q-mb-md">
@@ -109,16 +149,21 @@
 
 <script setup>
 import { computed } from 'vue'
-import { useRoute } from 'vue-router'
+import { useRoute, useRouter } from 'vue-router'
 import { useQuasar } from 'quasar'
-import { useCrate, useCrateChildren } from 'src/queries/crates'
+import { useCrate, useCrateChildren, useUpdateCrate, useDeleteCrate } from 'src/queries/crates'
 import { useJunkListInCrate } from 'src/queries/junk'
 import { iconForType } from 'src/utils/crateIcon'
 import CrateFormDialog from 'src/components/CrateFormDialog.vue'
+import CratePickerDialog from 'src/components/CratePickerDialog.vue'
 import JunkCaptureDialog from 'src/components/JunkCaptureDialog.vue'
 
-const route = useRoute()
-const $q    = useQuasar()
+const route  = useRoute()
+const router = useRouter()
+const $q     = useQuasar()
+
+const updateCrate = useUpdateCrate()
+const deleteCrate = useDeleteCrate()
 
 const crateId = computed( () => route.params.id )
 
@@ -152,6 +197,82 @@ function openAddJunk () {
             crateId:   crate.value.id,
             crateName: crate.value.name,
         },
+    } )
+}
+
+function openEdit () {
+    if ( !crate.value ) return
+    $q.dialog( {
+        component: CrateFormDialog,
+        componentProps: { crate: crate.value },
+    } )
+}
+
+function openMove () {
+    if ( !crate.value ) return
+    $q.dialog( { component: CratePickerDialog } )
+        .onOk( async ( picked ) => {
+            if ( !picked?.id || picked.id === crate.value.id ) return
+            try {
+                await updateCrate.mutateAsync( {
+                    id:      crate.value.id,
+                    payload: { parent_id: picked.id },
+                } )
+            }
+            catch ( err ) {
+                $q.notify( {
+                    color:   'negative',
+                    message: err?.body?.error?.message || err.message || 'Move failed',
+                } )
+            }
+        } )
+}
+
+async function moveToRoot () {
+    if ( !crate.value || !crate.value.parent_id ) return
+    try {
+        await updateCrate.mutateAsync( {
+            id:      crate.value.id,
+            payload: { parent_id: null },
+        } )
+    }
+    catch ( err ) {
+        $q.notify( {
+            color:   'negative',
+            message: err?.body?.error?.message || err.message || 'Move failed',
+        } )
+    }
+}
+
+function confirmDelete () {
+    if ( !crate.value ) return
+
+    const hasChildren = children.value.length > 0
+    const hasJunk     = junkItems.value.length > 0
+
+    let message = `Delete "${ crate.value.name }"?`
+    if ( hasChildren || hasJunk ) {
+        message += ' Everything inside (sub-crates and junk) will be deleted with it.'
+    }
+
+    $q.dialog( {
+        title:      'Delete crate',
+        message,
+        cancel:     true,
+        persistent: true,
+        ok:         { label: 'Delete', color: 'negative', flat: true },
+    } ).onOk( async () => {
+        const fallback = crate.value.parent_id ? `/crates/${ crate.value.parent_id }` : '/crates'
+        try {
+            await deleteCrate.mutateAsync( crate.value.id )
+            router.replace( fallback )
+        }
+        catch ( err ) {
+            $q.notify( {
+                color:   'negative',
+                message: err?.body?.error?.message || err.message || 'Delete failed',
+            } )
+        }
     } )
 }
 </script>
