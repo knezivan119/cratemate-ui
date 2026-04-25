@@ -63,7 +63,9 @@ export default defineConfig( ( /* ctx */ ) => {
                 API_URL: env.API_URL,
             },
 
-            // publicPath: '/',
+            // Served from nginx at https://<host>/spa/ in staging/production, alongside the
+            // Laravel API at /api/v1. Dev keeps '/' so the Quasar dev server works unchanged.
+            publicPath: appEnv === 'development' ? '/' : '/spa/',
             // analyze: true,
             // rawDefine: {}
             // ignorePublicFolder: true,
