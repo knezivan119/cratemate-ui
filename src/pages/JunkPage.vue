@@ -77,7 +77,7 @@ const columns = [
     { name: 'thumb', label: '', field: 'thumb', align: 'left' },
     { name: 'name', label: 'Name', field: 'name', align: 'left', sortable: true },
     { name: 'description', label: 'Description', field: 'description', align: 'left' },
-    { name: 'quantity', label: 'Qty', field: 'quantity', align: 'right' },
+    { name: 'quantity', label: 'Qty', field: ( row ) => `${ row.quantity } ${ row.unit || 'ea' }`, align: 'right' },
     { name: 'status', label: 'Status', field: 'status', align: 'left' },
 ]
 

@@ -213,13 +213,26 @@
                 autogrow
             />
 
-            <q-input
-                v-model.number="form.quantity"
-                label="Quantity"
-                outlined
-                type="number"
-                min="1"
-            />
+            <div class="row q-col-gutter-md">
+                <div class="col-6">
+                    <q-input
+                        v-model.number="form.quantity"
+                        label="Quantity"
+                        outlined
+                        type="number"
+                        min="1"
+                    />
+                </div>
+                <div class="col-6">
+                    <q-input
+                        v-model="form.unit"
+                        label="Unit"
+                        outlined
+                        placeholder="ea"
+                        maxlength="16"
+                    />
+                </div>
+            </div>
 
             <q-select
                 v-model="form.tags"
@@ -311,6 +324,7 @@ const form = ref( {
     name:        '',
     description: '',
     quantity:    1,
+    unit:        'ea',
     tags:        [],
     crate_id:    null,
 } )
@@ -323,6 +337,7 @@ watch(
             name:        j.name        || '',
             description: j.description || '',
             quantity:    j.quantity    || 1,
+            unit:        j.unit        || 'ea',
             tags:        ( j.tags || [] ).map( ( t ) => t.id ),
             crate_id:    j.crate_id,
         }
@@ -336,6 +351,7 @@ const isDirty = computed( () => {
     if ( form.value.name        !== ( j.name        || '' ) ) return true
     if ( form.value.description !== ( j.description || '' ) ) return true
     if ( form.value.quantity    !== ( j.quantity    || 1 ) )  return true
+    if ( form.value.unit        !== ( j.unit        || 'ea' ) ) return true
     if ( form.value.crate_id    !== j.crate_id )              return true
     const serverTagIds = ( j.tags || [] ).map( ( t ) => t.id ).sort().join( ',' )
     const localTagIds  = [ ...form.value.tags ].sort().join( ',' )
