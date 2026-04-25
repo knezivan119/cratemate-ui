@@ -31,3 +31,6 @@ yarn-error.log*
 
 # local .env files
 .env.local*
+
+# Env files live in the workspace root repo; sub-repo _env/ is a local symlink.
+/_env
