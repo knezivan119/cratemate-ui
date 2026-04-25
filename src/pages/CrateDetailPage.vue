@@ -29,7 +29,7 @@
         {{ loadError.message || 'Failed to load' }}
     </q-banner>
 
-    <div class="text-subtitle2 text-grey-7 q-mb-sm">Inside</div>
+    <div class="text-subtitle2 text-grey-7 q-mb-sm">Crates inside</div>
     <q-list separator bordered class="rounded-borders bg-white q-mb-lg">
         <q-item
             v-for="child in children"
@@ -56,11 +56,35 @@
         <q-item v-if="!childrenLoading && children.length === 0">
             <q-item-section>
                 <q-item-label class="text-grey-7">
-                    No crates inside. Add one or start dropping in Junk.
+                    No crates inside.
                 </q-item-label>
             </q-item-section>
         </q-item>
     </q-list>
+
+    <div class="text-subtitle2 text-grey-7 q-mb-sm">Junk inside</div>
+    <div v-if="!junkLoading && junkItems.length === 0" class="text-grey-7 q-mb-lg">
+        Nothing here yet. Tap "Add Junk" below to start.
+    </div>
+    <div v-else class="junk-gallery q-mb-lg">
+        <router-link
+            v-for="item in junkItems"
+            :key="item.id"
+            :to="`/junk/${ item.id }`"
+            class="gallery-cell"
+        >
+            <img
+                v-if="item.photos?.[ 0 ]?.thumb_url"
+                :src="item.photos[ 0 ].thumb_url"
+                :alt="item.name"
+                class="gallery-image"
+            />
+            <div v-else class="gallery-placeholder">
+                <q-icon name="image_not_supported" size="32px" color="grey-5" />
+            </div>
+            <div class="gallery-overlay">{{ item.name }}</div>
+        </router-link>
+    </div>
 
     <q-page-sticky position="bottom" :offset="[ 0, 16 ]" expand>
         <div class="row q-col-gutter-sm full-width q-px-md">
@@ -94,6 +118,7 @@ import { computed } from 'vue'
 import { useRoute } from 'vue-router'
 import { useQuasar } from 'quasar'
 import { useCrate, useCrateChildren } from 'src/queries/crates'
+import { useJunkListInCrate } from 'src/queries/junk'
 import { iconForType } from 'src/utils/crateIcon'
 import CrateFormDialog from 'src/components/CrateFormDialog.vue'
 import JunkCaptureDialog from 'src/components/JunkCaptureDialog.vue'
@@ -105,11 +130,13 @@ const crateId = computed( () => route.params.id )
 
 const { data: crateData, error: crateError } = useCrate( crateId )
 const { data: childrenData, isLoading: childrenLoading, error: childrenError } = useCrateChildren( crateId )
+const { data: junkData, isLoading: junkLoading, error: junkError } = useJunkListInCrate( crateId )
 
-const crate    = computed( () => crateData.value?.data )
-const children = computed( () => childrenData.value?.data ?? [] )
+const crate     = computed( () => crateData.value?.data )
+const children  = computed( () => childrenData.value?.data ?? [] )
+const junkItems = computed( () => junkData.value?.data ?? [] )
 
-const loadError = computed( () => crateError.value || childrenError.value )
+const loadError = computed( () => crateError.value || childrenError.value || junkError.value )
 
 const parentRoute = computed( () => {
     const parentId = crate.value?.parent_id
@@ -134,3 +161,49 @@ function openAddJunk () {
     } )
 }
 </script>
+
+<style scoped>
+.junk-gallery {
+    display: grid;
+    grid-template-columns: repeat( auto-fill, minmax( 120px, 1fr ) );
+    gap: 8px;
+}
+.gallery-cell {
+    position: relative;
+    aspect-ratio: 1 / 1;
+    border-radius: 6px;
+    overflow: hidden;
+    background: #f4f4f4;
+    display: block;
+    text-decoration: none;
+    color: inherit;
+}
+.gallery-image {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+}
+.gallery-placeholder {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #ececec;
+}
+.gallery-overlay {
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba( 0, 0, 0, 0.6 );
+    color: #fff;
+    padding: 4px 8px;
+    font-size: 12px;
+    line-height: 1.3;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+</style>

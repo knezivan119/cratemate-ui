@@ -29,6 +29,17 @@ export function useJunkInCrate ( crateId ) {
     } )
 }
 
+// Returns the actual list of junk in a single crate (with photos), for the gallery on CrateDetailPage.
+// Direct-only — does not recurse into child crates. per_page is high to skip pagination UI for now;
+// add real pagination here if any single crate routinely exceeds this.
+export function useJunkListInCrate ( crateId ) {
+    return useQuery( {
+        queryKey: computed( () => [ ...junkKeys.inCrate( unref( crateId ) ), 'list' ] ),
+        queryFn:  () => apiFetch( `/junk?crate_id=${ unref( crateId ) }&per_page=100` ),
+        enabled:  computed( () => !!unref( crateId ) ),
+    } )
+}
+
 export function useJunk ( id ) {
     return useQuery( {
         queryKey: computed( () => junkKeys.detail( unref( id ) ) ),
