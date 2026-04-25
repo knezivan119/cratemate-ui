@@ -12,6 +12,7 @@ const routes = [
         children: [
             { path: '', component: () => import( 'pages/DashboardPage.vue' ) },
             { path: 'crates', component: () => import( 'pages/CratesPage.vue' ) },
+            { path: 'crates/:id', component: () => import( 'pages/CrateDetailPage.vue' ) },
             { path: 'junk', component: () => import( 'pages/JunkPage.vue' ) },
             { path: 'image-test', component: () => import( 'pages/ImageTestPage.vue' ) },
         ],

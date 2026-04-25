@@ -1,122 +1,78 @@
 <template>
 <q-page padding>
     <div class="row items-center q-mb-md">
-        <div class="text-h4">Crates</div>
-        <q-space />
-        <q-btn
-            color="primary"
-            icon="add"
-            label="New Crate"
-            @click="openCreate"
-        />
+        <div class="text-h5">Crates</div>
     </div>
 
-    <q-banner v-if="crateStore.error" rounded class="bg-negative text-white q-mb-md">
-        {{ crateStore.error }}
+    <q-banner v-if="error" rounded class="bg-negative text-white q-mb-md">
+        {{ errorMessage }}
     </q-banner>
 
-    <q-table
-        :rows="crateStore.crates"
-        :columns="columns"
-        row-key="id"
-        :loading="crateStore.loading"
-        flat
-        bordered
-        :pagination="tablePagination"
-        @request="onRequest"
-    >
-        <template #body-cell-type="props">
-            <q-td :props="props">
-                <q-badge
-                    v-if="props.value"
-                    outline
-                    color="primary"
-                    :label="props.value"
-                />
-                <span v-else class="text-grey-5">--</span>
-            </q-td>
-        </template>
+    <q-list separator bordered class="rounded-borders bg-white">
+        <q-item
+            v-for="crate in crates"
+            :key="crate.id"
+            clickable
+            v-ripple
+            class="q-py-md"
+            :to="`/crates/${ crate.id }`"
+        >
+            <q-item-section avatar>
+                <q-avatar :color="iconForType( crate.type ).color" text-color="white" size="48px">
+                    <q-icon :name="iconForType( crate.type ).icon" />
+                </q-avatar>
+            </q-item-section>
 
-        <template #body-cell-actions="props">
-            <q-td :props="props" auto-width>
-                <q-btn
-                    flat
-                    dense
-                    icon="edit"
-                    color="primary"
-                    @click="openEdit( props.row )"
-                />
-                <q-btn
-                    flat
-                    dense
-                    icon="delete"
-                    color="negative"
-                    @click="confirmDelete( props.row )"
-                />
-            </q-td>
-        </template>
+            <q-item-section>
+                <q-item-label class="text-body1">{{ crate.name }}</q-item-label>
+                <q-item-label v-if="crate.type" caption>{{ crate.type }}</q-item-label>
+            </q-item-section>
 
-        <template #no-data>
-            <div class="full-width row flex-center text-grey-7 q-pa-lg">
-                No crates yet. Create your first one!
-            </div>
-        </template>
-    </q-table>
+            <q-item-section side>
+                <q-icon name="chevron_right" />
+            </q-item-section>
+        </q-item>
+
+        <q-item v-if="!isLoading && crates.length === 0">
+            <q-item-section>
+                <q-item-label class="text-grey-7">
+                    No crates yet. Create your first one below.
+                </q-item-label>
+            </q-item-section>
+        </q-item>
+    </q-list>
+
+    <q-page-sticky position="bottom-right" :offset="[ 18, 18 ]">
+        <q-btn
+            fab
+            color="primary"
+            icon="add"
+            label="Add Crate"
+            @click="openAdd"
+        />
+    </q-page-sticky>
 </q-page>
 </template>
 
 <script setup>
-import { computed, onMounted } from 'vue'
+import { computed } from 'vue'
 import { useQuasar } from 'quasar'
-import { useCrateStore } from 'src/stores/crate-store'
+import { useCrateChildren } from 'src/queries/crates'
+import { iconForType } from 'src/utils/crateIcon'
 import CrateFormDialog from 'src/components/CrateFormDialog.vue'
 
 const $q = useQuasar()
-const crateStore = useCrateStore()
 
-const columns = [
-    { name: 'name', label: 'Name', field: 'name', align: 'left', sortable: true },
-    { name: 'type', label: 'Type', field: 'type', align: 'left' },
-    { name: 'description', label: 'Description', field: 'description', align: 'left' },
-    { name: 'status', label: 'Status', field: 'status', align: 'left' },
-    { name: 'actions', label: '', field: 'actions', align: 'right' },
-]
+const { data, isLoading, error } = useCrateChildren( null )
 
-const tablePagination = computed( () => ( {
-    page: crateStore.meta.page,
-    rowsPerPage: crateStore.meta.per_page,
-    rowsNumber: crateStore.meta.total,
-} ) )
+const crates = computed( () => data.value?.data ?? [] )
 
-function onRequest ( props ) {
-    crateStore.fetchCrates( props.pagination.page )
-}
+const errorMessage = computed( () => error.value?.message || 'Failed to load crates' )
 
-function openCreate () {
+function openAdd () {
     $q.dialog( {
         component: CrateFormDialog,
+        componentProps: { parentId: null },
     } )
 }
-
-function openEdit ( crate ) {
-    $q.dialog( {
-        component: CrateFormDialog,
-        componentProps: { crate },
-    } )
-}
-
-function confirmDelete ( crate ) {
-    $q.dialog( {
-        title: 'Delete Crate',
-        message: `Delete "${crate.name}"? This cannot be undone.`,
-        cancel: true,
-        persistent: true,
-    } ).onOk( () => {
-        crateStore.deleteCrate( crate.id )
-    } )
-}
-
-onMounted( () => {
-    crateStore.fetchCrates()
-} )
 </script>
