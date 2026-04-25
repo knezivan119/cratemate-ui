@@ -2,10 +2,10 @@
 <q-dialog
     ref="dialogRef"
     persistent
-    maximized
+    :maximized="isMobile"
     @hide="onDialogHide"
 >
-    <q-card class="column no-wrap">
+    <q-card class="column no-wrap" :class="{ 'desktop-card': !isMobile }">
         <q-toolbar class="bg-primary text-white">
             <q-toolbar-title class="text-subtitle1">
                 Add Junk to {{ crateName || '…' }}
@@ -24,30 +24,55 @@
             <div class="text-h6 q-mb-md">{{ autoName }}</div>
 
             <q-banner
-                v-if="cameraError"
+                v-if="!cameraSupported"
+                rounded
+                class="bg-warning text-white q-mb-md"
+            >
+                Camera capture is not supported in this browser.
+            </q-banner>
+
+            <q-banner
+                v-else-if="cameraError"
                 rounded
                 class="bg-negative text-white q-mb-md"
             >
-                {{ cameraError }}
+                <div>{{ cameraError }}</div>
+                <div v-if="isInUseError" class="text-caption q-mt-xs">
+                    Close other apps using the camera (Zoom, browser tabs, OBS) and try again.
+                </div>
+                <template #action>
+                    <q-btn flat label="Try again" @click="startCamera" />
+                </template>
             </q-banner>
 
             <div class="camera-frame q-mb-sm">
                 <video
+                    v-show="streaming"
                     ref="videoEl"
                     autoplay
                     playsinline
                     muted
                     class="camera-preview"
                 />
+                <div
+                    v-if="!streaming"
+                    class="camera-placeholder column flex-center text-grey-5"
+                >
+                    <q-icon name="videocam_off" size="48px" />
+                    <div class="q-mt-sm text-caption">
+                        {{ cameraSupported ? 'Camera off' : 'Camera unavailable' }}
+                    </div>
+                </div>
             </div>
 
-            <div class="row q-gutter-sm q-mb-md">
+            <div class="row q-gutter-sm q-mb-md items-center">
                 <q-btn
                     v-if="!streaming"
                     color="primary"
                     icon="videocam"
                     label="Start camera"
                     class="col"
+                    :disable="!cameraSupported"
                     @click="startCamera"
                 />
                 <template v-else>
@@ -69,6 +94,19 @@
                     />
                 </template>
             </div>
+
+            <q-select
+                v-if="streaming && deviceOptions.length > 1"
+                v-model="deviceId"
+                :options="deviceOptions"
+                label="Camera"
+                outlined
+                dense
+                emit-value
+                map-options
+                class="q-mb-md"
+                @update:model-value="restartIfStreaming"
+            />
 
             <div v-if="atPhotoLimit" class="text-caption text-warning q-mb-md">
                 Max {{ MAX_PHOTOS }} photos per Junk.
@@ -134,7 +172,7 @@
 
 <script setup>
 import { ref, computed, onMounted, onBeforeUnmount } from 'vue'
-import { useDialogPluginComponent } from 'quasar'
+import { useDialogPluginComponent, useQuasar } from 'quasar'
 import { useCamera } from 'src/composables/useCamera'
 import { useCreateJunk, useUploadJunkPhoto, useJunkInCrate } from 'src/queries/junk'
 
@@ -155,15 +193,34 @@ defineEmits( [ ...useDialogPluginComponent.emits ] )
 
 const { dialogRef, onDialogHide, onDialogOK, onDialogCancel } = useDialogPluginComponent()
 
+const $q = useQuasar()
+const isMobile = computed( () => $q.platform.is.mobile )
+
 const {
     videoEl,
     streaming,
     error: cameraError,
+    devices,
+    deviceId,
+    supported: cameraSupported,
     startCamera,
     stopCamera,
     capture,
     clearCapture,
+    restartIfStreaming,
 } = useCamera()
+
+const deviceOptions = computed( () =>
+    devices.value.map( ( d, i ) => ( {
+        label: d.label || `Camera ${ i + 1 }`,
+        value: d.deviceId,
+    } ) ),
+)
+
+const isInUseError = computed( () => {
+    const msg = cameraError.value || ''
+    return msg.includes( 'NotReadable' ) || msg.includes( 'TrackStart' ) || msg.includes( 'AbortError' )
+} )
 
 const createJunk  = useCreateJunk()
 const uploadPhoto = useUploadJunkPhoto()
@@ -246,27 +303,40 @@ async function onSave ( andAdd ) {
 }
 
 onMounted( () => {
-    startCamera()
+    if ( isMobile.value && cameraSupported ) {
+        startCamera()
+    }
 } )
 
 onBeforeUnmount( () => {
+    stopCamera()
     clearPhotosLocal()
 } )
 </script>
 
 <style scoped>
+.desktop-card {
+    width: 640px;
+    max-width: 95vw;
+    max-height: 90vh;
+}
 .camera-frame {
     width: 100%;
     aspect-ratio: 1 / 1;
     background: #000;
     border-radius: 8px;
     overflow: hidden;
+    position: relative;
 }
 .camera-preview {
     width: 100%;
     height: 100%;
     object-fit: cover;
     display: block;
+}
+.camera-placeholder {
+    width: 100%;
+    height: 100%;
 }
 .thumb {
     width: 100%;
