@@ -1,4 +1,4 @@
-import { computed } from 'vue'
+import { computed, unref } from 'vue'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/vue-query'
 import { apiFetch } from 'src/boot/api'
 
@@ -6,6 +6,7 @@ export const junkKeys = {
     all: [ 'junk' ],
     lists: () => [ ...junkKeys.all, 'list' ],
     list:  ( filters ) => [ ...junkKeys.lists(), filters ],
+    inCrate: ( crateId ) => [ ...junkKeys.all, 'in-crate', crateId ],
     details: () => [ ...junkKeys.all, 'detail' ],
     detail:  ( id ) => [ ...junkKeys.details(), id ],
 }
@@ -18,6 +19,16 @@ export function useJunkList ( page ) {
     } )
 }
 
+// Returns junk in a single crate. Used by the capture dialog to derive "Junk #N" by reading meta.total.
+// per_page=1 keeps the payload tiny — we only need the count.
+export function useJunkInCrate ( crateId ) {
+    return useQuery( {
+        queryKey: computed( () => junkKeys.inCrate( unref( crateId ) ) ),
+        queryFn:  () => apiFetch( `/junk?crate_id=${ unref( crateId ) }&per_page=1` ),
+        enabled:  computed( () => !!unref( crateId ) ),
+    } )
+}
+
 export function useCreateJunk () {
     const qc = useQueryClient()
     return useMutation( {
@@ -25,8 +36,11 @@ export function useCreateJunk () {
             method: 'POST',
             body: JSON.stringify( payload ),
         } ),
-        onSuccess: () => {
+        onSuccess: ( res ) => {
             qc.invalidateQueries( { queryKey: junkKeys.lists() } )
+            if ( res?.data?.crate_id ) {
+                qc.invalidateQueries( { queryKey: junkKeys.inCrate( res.data.crate_id ) } )
+            }
         },
     } )
 }

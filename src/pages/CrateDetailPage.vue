@@ -96,6 +96,7 @@ import { useQuasar } from 'quasar'
 import { useCrate, useCrateChildren } from 'src/queries/crates'
 import { iconForType } from 'src/utils/crateIcon'
 import CrateFormDialog from 'src/components/CrateFormDialog.vue'
+import JunkCaptureDialog from 'src/components/JunkCaptureDialog.vue'
 
 const route = useRoute()
 const $q    = useQuasar()
@@ -123,9 +124,13 @@ function openAddCrate () {
 }
 
 function openAddJunk () {
-    $q.notify( {
-        message: 'Junk capture coming in the next phase.',
-        color:   'info',
+    if ( !crate.value ) return
+    $q.dialog( {
+        component: JunkCaptureDialog,
+        componentProps: {
+            crateId:   crate.value.id,
+            crateName: crate.value.name,
+        },
     } )
 }
 </script>
