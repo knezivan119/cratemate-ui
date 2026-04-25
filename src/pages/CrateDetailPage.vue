@@ -29,38 +29,32 @@
         {{ loadError.message || 'Failed to load' }}
     </q-banner>
 
-    <div class="text-subtitle2 text-grey-7 q-mb-sm">Crates inside</div>
-    <q-list separator bordered class="rounded-borders bg-white q-mb-lg">
-        <q-item
-            v-for="child in children"
-            :key="child.id"
-            clickable
-            v-ripple
-            class="q-py-md"
-            :to="`/crates/${ child.id }`"
-        >
-            <q-item-section avatar>
-                <q-avatar :color="iconForType( child.type ).color" text-color="white" size="48px">
-                    <q-icon :name="iconForType( child.type ).icon" />
-                </q-avatar>
-            </q-item-section>
-            <q-item-section>
-                <q-item-label class="text-body1">{{ child.name }}</q-item-label>
-                <q-item-label v-if="child.type" caption>{{ child.type }}</q-item-label>
-            </q-item-section>
-            <q-item-section side>
-                <q-icon name="chevron_right" />
-            </q-item-section>
-        </q-item>
-
-        <q-item v-if="!childrenLoading && children.length === 0">
-            <q-item-section>
-                <q-item-label class="text-grey-7">
-                    No crates inside.
-                </q-item-label>
-            </q-item-section>
-        </q-item>
-    </q-list>
+    <template v-if="children.length > 0">
+        <div class="text-subtitle2 text-grey-7 q-mb-sm">Crates inside</div>
+        <q-list separator bordered class="rounded-borders bg-white q-mb-lg">
+            <q-item
+                v-for="child in children"
+                :key="child.id"
+                clickable
+                v-ripple
+                class="q-py-md"
+                :to="`/crates/${ child.id }`"
+            >
+                <q-item-section avatar>
+                    <q-avatar :color="iconForType( child.type ).color" text-color="white" size="48px">
+                        <q-icon :name="iconForType( child.type ).icon" />
+                    </q-avatar>
+                </q-item-section>
+                <q-item-section>
+                    <q-item-label class="text-body1">{{ child.name }}</q-item-label>
+                    <q-item-label v-if="child.type" caption>{{ child.type }}</q-item-label>
+                </q-item-section>
+                <q-item-section side>
+                    <q-icon name="chevron_right" />
+                </q-item-section>
+            </q-item>
+        </q-list>
+    </template>
 
     <div class="text-subtitle2 text-grey-7 q-mb-sm">Junk inside</div>
     <div v-if="!junkLoading && junkItems.length === 0" class="text-grey-7 q-mb-lg">
@@ -129,7 +123,7 @@ const $q    = useQuasar()
 const crateId = computed( () => route.params.id )
 
 const { data: crateData, error: crateError } = useCrate( crateId )
-const { data: childrenData, isLoading: childrenLoading, error: childrenError } = useCrateChildren( crateId )
+const { data: childrenData, error: childrenError } = useCrateChildren( crateId )
 const { data: junkData, isLoading: junkLoading, error: junkError } = useJunkListInCrate( crateId )
 
 const crate     = computed( () => crateData.value?.data )
