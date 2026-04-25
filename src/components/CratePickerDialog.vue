@@ -90,8 +90,27 @@
                 <q-item v-if="!isLoading && children.length === 0">
                     <q-item-section>
                         <q-item-label class="text-grey-7">
-                            <span v-if="currentEntry">Nothing inside here.</span>
-                            <span v-else>No crates yet — create one first.</span>
+                            <span v-if="currentEntry">Nothing inside here yet.</span>
+                            <span v-else>No crates yet — create your first below.</span>
+                        </q-item-label>
+                    </q-item-section>
+                </q-item>
+
+                <q-item
+                    clickable
+                    v-ripple
+                    class="q-py-md text-primary"
+                    @click="openCreateInPlace"
+                >
+                    <q-item-section avatar>
+                        <q-avatar color="primary" text-color="white" size="40px">
+                            <q-icon name="add" />
+                        </q-avatar>
+                    </q-item-section>
+                    <q-item-section>
+                        <q-item-label>
+                            <span v-if="currentEntry">Create crate inside {{ currentEntry.name }}</span>
+                            <span v-else>Create new root crate</span>
                         </q-item-label>
                     </q-item-section>
                 </q-item>
@@ -106,6 +125,7 @@ import { ref, computed } from 'vue'
 import { useDialogPluginComponent, useQuasar } from 'quasar'
 import { useCrateChildren } from 'src/queries/crates'
 import { iconForType } from 'src/utils/crateIcon'
+import CrateFormDialog from 'src/components/CrateFormDialog.vue'
 
 defineEmits( [ ...useDialogPluginComponent.emits ] )
 
@@ -147,6 +167,18 @@ function select () {
         name: currentEntry.value.name,
         type: currentEntry.value.type,
     } )
+}
+
+function openCreateInPlace () {
+    $q.dialog( {
+        component: CrateFormDialog,
+        componentProps: { parentId: currentId.value },
+    } )
+        .onOk( ( created ) => {
+            if ( created?.id ) {
+                drillInto( created )
+            }
+        } )
 }
 </script>
 

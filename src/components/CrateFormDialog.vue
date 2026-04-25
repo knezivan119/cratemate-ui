@@ -98,19 +98,20 @@ async function onSubmit () {
     saving.value      = true
     submitError.value = null
     try {
+        let result = null
         if ( isEdit.value ) {
-            await updateCrate.mutateAsync( {
+            result = await updateCrate.mutateAsync( {
                 id:      props.crate.id,
                 payload: form,
             } )
         }
         else {
-            await createCrate.mutateAsync( {
+            result = await createCrate.mutateAsync( {
                 ...form,
                 parent_id: props.parentId,
             } )
         }
-        onDialogOK()
+        onDialogOK( result?.data )
     }
     catch ( err ) {
         submitError.value = err?.body?.error?.message || err.message || 'Save failed'
