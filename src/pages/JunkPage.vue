@@ -1,14 +1,7 @@
 <template>
 <q-page padding>
     <div class="row items-center q-mb-md">
-        <div class="text-h4">Junk</div>
-        <q-space />
-        <q-btn
-            color="primary"
-            icon="add"
-            label="New Junk"
-            @click="openCreate"
-        />
+        <div class="text-h5">Junk</div>
     </div>
 
     <q-banner v-if="junkError" rounded class="bg-negative text-white q-mb-md">
@@ -24,6 +17,7 @@
         bordered
         :pagination="tablePagination"
         @request="onRequest"
+        @row-click="onRowClick"
     >
         <template #body-cell-thumb="props">
             <q-td :props="props" auto-width>
@@ -42,40 +36,15 @@
             </q-td>
         </template>
 
-        <template #body-cell-crate="props">
-            <q-td :props="props">
-                {{ crateNameById( props.row.crate_id ) }}
-            </q-td>
-        </template>
-
         <template #body-cell-status="props">
             <q-td :props="props">
                 <q-badge outline color="primary" :label="props.value" />
             </q-td>
         </template>
 
-        <template #body-cell-actions="props">
-            <q-td :props="props" auto-width>
-                <q-btn
-                    flat
-                    dense
-                    icon="edit"
-                    color="primary"
-                    @click="openEdit( props.row )"
-                />
-                <q-btn
-                    flat
-                    dense
-                    icon="delete"
-                    color="negative"
-                    @click="confirmDelete( props.row )"
-                />
-            </q-td>
-        </template>
-
         <template #no-data>
             <div class="full-width row flex-center text-grey-7 q-pa-lg">
-                No junk yet. Create your first one!
+                No junk yet. Open a crate and tap "Add Junk" to start.
             </div>
         </template>
     </q-table>
@@ -83,24 +52,18 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted } from 'vue'
-import { useQuasar } from 'quasar'
-import { useCrateStore } from 'src/stores/crate-store'
-import { useJunkList, useDeleteJunk } from 'src/queries/junk'
-import JunkFormDialog from 'src/components/JunkFormDialog.vue'
+import { ref, computed } from 'vue'
+import { useRouter } from 'vue-router'
+import { useJunkList } from 'src/queries/junk'
 
-const $q         = useQuasar()
-const crateStore = useCrateStore()
-
-const page = ref( 1 )
+const router = useRouter()
+const page   = ref( 1 )
 
 const {
     data: junkResponse,
     error: junkError,
     isFetching: junkFetching,
 } = useJunkList( page )
-
-const { mutate: deleteJunkMutate } = useDeleteJunk()
 
 const rows = computed( () => junkResponse.value?.data ?? [] )
 const meta = computed( () => junkResponse.value?.meta ?? {
@@ -113,10 +76,9 @@ const meta = computed( () => junkResponse.value?.meta ?? {
 const columns = [
     { name: 'thumb', label: '', field: 'thumb', align: 'left' },
     { name: 'name', label: 'Name', field: 'name', align: 'left', sortable: true },
-    { name: 'crate', label: 'Crate', field: 'crate_id', align: 'left' },
     { name: 'description', label: 'Description', field: 'description', align: 'left' },
+    { name: 'quantity', label: 'Qty', field: 'quantity', align: 'right' },
     { name: 'status', label: 'Status', field: 'status', align: 'left' },
-    { name: 'actions', label: '', field: 'actions', align: 'right' },
 ]
 
 const tablePagination = computed( () => ( {
@@ -129,39 +91,9 @@ function onRequest ( props ) {
     page.value = props.pagination.page
 }
 
-function crateNameById ( id ) {
-    return crateStore.crates.find( ( c ) => c.id === id )?.name || '—'
+function onRowClick ( _evt, row ) {
+    router.push( `/junk/${ row.id }` )
 }
-
-function openCreate () {
-    $q.dialog( {
-        component: JunkFormDialog,
-    } )
-}
-
-function openEdit ( junk ) {
-    $q.dialog( {
-        component: JunkFormDialog,
-        componentProps: { junk },
-    } )
-}
-
-function confirmDelete ( junk ) {
-    $q.dialog( {
-        title: 'Delete Junk',
-        message: `Delete "${ junk.name }"? This cannot be undone.`,
-        cancel: true,
-        persistent: true,
-    } ).onOk( () => {
-        deleteJunkMutate( junk.id )
-    } )
-}
-
-onMounted( () => {
-    if ( !crateStore.crates.length ) {
-        crateStore.fetchCrates()
-    }
-} )
 </script>
 
 <style scoped>
