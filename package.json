@@ -11,6 +11,8 @@
     "test": "echo \"No test specified\" && exit 0",
     "dev": "quasar dev",
     "build": "quasar build",
+    "build:staging": "APP_ENV=staging quasar build",
+    "build:production": "APP_ENV=production quasar build",
     "postinstall": "quasar prepare"
   },
   "dependencies": {
