@@ -29,6 +29,14 @@ export function useJunkInCrate ( crateId ) {
     } )
 }
 
+export function useJunk ( id ) {
+    return useQuery( {
+        queryKey: computed( () => junkKeys.detail( unref( id ) ) ),
+        queryFn:  () => apiFetch( `/junk/${ unref( id ) }` ),
+        enabled:  computed( () => !!unref( id ) ),
+    } )
+}
+
 export function useCreateJunk () {
     const qc = useQueryClient()
     return useMutation( {
@@ -83,6 +91,20 @@ export function useUploadJunkPhoto () {
         onSuccess: ( _data, variables ) => {
             qc.invalidateQueries( { queryKey: junkKeys.lists() } )
             qc.invalidateQueries( { queryKey: junkKeys.detail( variables.junkId ) } )
+        },
+    } )
+}
+
+export function useDeleteJunkPhoto () {
+    const qc = useQueryClient()
+    return useMutation( {
+        mutationFn: ( { junkId, photoId } ) => apiFetch(
+            `/junk/${ junkId }/photos/${ photoId }`,
+            { method: 'DELETE' },
+        ),
+        onSuccess: ( _data, variables ) => {
+            qc.invalidateQueries( { queryKey: junkKeys.detail( variables.junkId ) } )
+            qc.invalidateQueries( { queryKey: junkKeys.lists() } )
         },
     } )
 }
