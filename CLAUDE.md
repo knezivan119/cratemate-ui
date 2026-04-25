@@ -54,12 +54,13 @@ ESLint enforces this via `space-in-parens`, `array-bracket-spacing`, `object-cur
 ## Architecture
 
 - `src/layouts/MainLayout.vue` — app shell with left drawer navigation
-- `src/pages/` — route-level page components (lazy-loaded)
-- `src/router/routes.js` — route definitions
-- `src/stores/` — Pinia store setup (boilerplate only, no stores defined yet)
-- `src/boot/` — Quasar boot files (none configured yet)
+- `src/pages/` — route-level page components, lazy-loaded
+- `src/router/routes.js` — route definitions; route guards via `requiresAuth` / `public` meta
+- `src/stores/` — Pinia stores (e.g. `auth-store`, `crate-store`)
+- `src/components/` — shared dialogs (e.g. `CrateFormDialog`, `JunkFormDialog`)
+- `src/boot/` — Quasar boot files
 - `src/css/app.scss` — global styles
 
 ## Current State
 
-Early scaffold. Two pages exist (Dashboard placeholder, ImageTest camera capture proof-of-concept). No API integration, no Pinia stores, no auth. The app is a shell waiting for feature work.
+See `../platform/progress.md` for the workspace-wide snapshot. UI side: Sanctum login wired, TanStack Vue Query against the API, Crates and Junk pages with CRUD dialogs, camera capture composable in place.
