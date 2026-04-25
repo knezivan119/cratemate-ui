@@ -57,13 +57,6 @@
                 </q-item-section>
                 <q-item-section>Junk</q-item-section>
             </q-item>
-
-            <q-item clickable :to="'/image-test'">
-                <q-item-section avatar>
-                    <q-icon name="image" />
-                </q-item-section>
-                <q-item-section>Image Test</q-item-section>
-            </q-item>
         </q-list>
     </q-drawer>
 

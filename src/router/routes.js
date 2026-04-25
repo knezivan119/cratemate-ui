@@ -14,7 +14,6 @@ const routes = [
             { path: 'crates', component: () => import( 'pages/CratesPage.vue' ) },
             { path: 'crates/:id', component: () => import( 'pages/CrateDetailPage.vue' ) },
             { path: 'junk', component: () => import( 'pages/JunkPage.vue' ) },
-            { path: 'image-test', component: () => import( 'pages/ImageTestPage.vue' ) },
         ],
     },
 
