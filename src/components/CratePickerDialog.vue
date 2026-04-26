@@ -121,10 +121,10 @@
 </template>
 
 <script setup>
-import { ref, computed } from 'vue'
+import { computed } from 'vue'
 import { useDialogPluginComponent, useQuasar } from 'quasar'
-import { useCrateChildren } from 'src/queries/crateQuery'
-import { iconForType } from 'src/utils/crateIcon'
+import { useCrateDrilldown } from 'src/uses/crateDrilldownUse'
+import { iconForType } from 'src/data/crateTypeData'
 import CrateFormDialog from 'src/components/CrateFormDialog.vue'
 
 defineEmits( [ ...useDialogPluginComponent.emits ] )
@@ -134,31 +134,18 @@ const { dialogRef, onDialogHide, onDialogOK, onDialogCancel } = useDialogPluginC
 const $q = useQuasar()
 const isMobile = computed( () => $q.platform.is.mobile )
 
-// `path` is the breadcrumb trail of crates we've drilled into. Each entry is { id, name, type }.
-// Empty path = at root (showing root crates).
-const path = ref( [] )
-
-const currentEntry = computed( () => path.value[ path.value.length - 1 ] || null )
-const currentId    = computed( () => currentEntry.value?.id ?? null )
-
-const { data, error, isLoading } = useCrateChildren( currentId )
-const children = computed( () => data.value?.data ?? [] )
-
-function drillInto ( crate ) {
-    path.value.push( { id: crate.id, name: crate.name, type: crate.type } )
-}
-
-function goUp () {
-    path.value.pop()
-}
-
-function goToDepth ( idx ) {
-    path.value = path.value.slice( 0, idx + 1 )
-}
-
-function reset () {
-    path.value = []
-}
+const {
+    path,
+    currentEntry,
+    currentId,
+    children,
+    error,
+    isLoading,
+    drillInto,
+    goUp,
+    goToDepth,
+    reset,
+} = useCrateDrilldown()
 
 function select () {
     if ( !currentEntry.value ) return

@@ -8,26 +8,24 @@
                     <div class="text-caption text-grey-7">CrateMate</div>
                 </q-card-section>
 
-                <q-form @submit.prevent="onSubmit">
+                <q-form @submit.prevent="submit">
                     <q-card-section class="q-gutter-md">
-                        <q-input
+                        <TextInput
                             v-model="form.email"
                             label="Email"
-                            outlined
                             type="email"
                             autocomplete="email"
                             :rules="[ ( val ) => !!val || 'Email is required' ]"
                         />
-                        <q-input
+                        <TextInput
                             v-model="form.password"
                             label="Password"
-                            outlined
                             type="password"
                             autocomplete="current-password"
                             :rules="[ ( val ) => !!val || 'Password is required' ]"
                         />
-                        <q-banner v-if="error" rounded class="bg-negative text-white">
-                            {{ error }}
+                        <q-banner v-if="errorMessage" rounded class="bg-negative text-white">
+                            {{ errorMessage }}
                         </q-banner>
                     </q-card-section>
 
@@ -47,36 +45,8 @@
 </template>
 
 <script setup>
-import { reactive, ref } from 'vue'
-import { useRouter, useRoute } from 'vue-router'
-import { useAuthStore } from 'src/stores/authStore'
+import { useLogin } from 'src/uses/loginUse'
+import TextInput from 'src/components/input/TextInput.vue'
 
-const router    = useRouter()
-const route     = useRoute()
-const authStore = useAuthStore()
-
-const form = reactive( {
-    email: '',
-    password: '',
-} )
-const loading = ref( false )
-const error   = ref( null )
-
-async function onSubmit () {
-    loading.value = true
-    error.value   = null
-    try {
-        await authStore.login( form )
-        const redirect = typeof route.query.redirect === 'string'
-            ? route.query.redirect
-            : '/'
-        router.replace( redirect )
-    }
-    catch ( err ) {
-        error.value = err?.body?.error?.message || err.message || 'Login failed'
-    }
-    finally {
-        loading.value = false
-    }
-}
+const { form, loading, errorMessage, submit } = useLogin()
 </script>

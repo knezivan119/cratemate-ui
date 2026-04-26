@@ -95,15 +95,12 @@
                 </template>
             </div>
 
-            <q-select
+            <SelectInput
                 v-if="streaming && deviceOptions.length > 1"
                 v-model="deviceId"
                 :options="deviceOptions"
                 label="Camera"
-                outlined
                 dense
-                emit-value
-                map-options
                 class="q-mb-md"
                 @update:model-value="restartIfStreaming"
             />
@@ -135,8 +132,8 @@
                 </div>
             </div>
 
-            <q-banner v-if="submitError" rounded class="bg-negative text-white q-mt-md">
-                {{ submitError }}
+            <q-banner v-if="errorMessage" rounded class="bg-negative text-white q-mt-md">
+                {{ errorMessage }}
             </q-banner>
         </q-card-section>
 
@@ -150,7 +147,7 @@
                     size="lg"
                     :loading="saving"
                     :disable="!canSave"
-                    @click="onSave( false )"
+                    @click="save( false )"
                 />
             </div>
             <div class="col">
@@ -162,7 +159,7 @@
                     size="lg"
                     :loading="saving"
                     :disable="!canSave"
-                    @click="onSave( true )"
+                    @click="save( true )"
                 />
             </div>
         </q-card-actions>
@@ -171,12 +168,10 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted, onBeforeUnmount } from 'vue'
-import { useDialogPluginComponent, useQuasar } from 'quasar'
-import { useCamera } from 'src/uses/cameraUse'
-import { useCreateJunk, useUploadJunkPhoto, useJunkInCrate } from 'src/queries/junkQuery'
-
-const MAX_PHOTOS = 5
+import { computed } from 'vue'
+import { useDialogPluginComponent } from 'quasar'
+import { useJunkCapture } from 'src/uses/junkCaptureUse'
+import SelectInput from 'src/components/input/SelectInput.vue'
 
 const props = defineProps( {
     crateId: {
@@ -193,124 +188,31 @@ defineEmits( [ ...useDialogPluginComponent.emits ] )
 
 const { dialogRef, onDialogHide, onDialogOK, onDialogCancel } = useDialogPluginComponent()
 
-const $q = useQuasar()
-const isMobile = computed( () => $q.platform.is.mobile )
-
 const {
+    MAX_PHOTOS,
+    isMobile,
     videoEl,
     streaming,
-    error: cameraError,
-    devices,
+    cameraError,
+    cameraSupported,
+    isInUseError,
     deviceId,
-    supported: cameraSupported,
+    deviceOptions,
     startCamera,
     stopCamera,
-    capture,
-    clearCapture,
     restartIfStreaming,
-} = useCamera()
-
-const deviceOptions = computed( () =>
-    devices.value.map( ( d, i ) => ( {
-        label: d.label || `Camera ${ i + 1 }`,
-        value: d.deviceId,
-    } ) ),
-)
-
-const isInUseError = computed( () => {
-    const msg = cameraError.value || ''
-    return msg.includes( 'NotReadable' ) || msg.includes( 'TrackStart' ) || msg.includes( 'AbortError' )
-} )
-
-const createJunk  = useCreateJunk()
-const uploadPhoto = useUploadJunkPhoto()
-
-const { data: crateJunkData, refetch: refetchCount } = useJunkInCrate( computed( () => props.crateId ) )
-
-// `nextNumber` advances locally as items are saved within this dialog session, so the user sees
-// "Junk #4 → #5 → #6" without waiting on a server round-trip between saves.
-const localOffset = ref( 0 )
-const baseCount   = computed( () => crateJunkData.value?.meta?.total ?? 0 )
-const nextNumber  = computed( () => baseCount.value + localOffset.value + 1 )
-const autoName    = computed( () => `Junk #${ nextNumber.value }` )
-
-const photos      = ref( [] )
-const saving      = ref( false )
-const submitError = ref( null )
-
-const atPhotoLimit = computed( () => photos.value.length >= MAX_PHOTOS )
-const canSave      = computed( () => photos.value.length > 0 && !saving.value )
-
-async function onCapture () {
-    if ( atPhotoLimit.value ) return
-    const blob = await capture()
-    if ( !blob ) return
-    const url = URL.createObjectURL( blob )
-    photos.value.push( { blob, url } )
-    clearCapture()
-}
-
-function removePhoto ( idx ) {
-    const [ removed ] = photos.value.splice( idx, 1 )
-    if ( removed?.url ) URL.revokeObjectURL( removed.url )
-}
-
-function clearPhotosLocal () {
-    for ( const p of photos.value ) {
-        if ( p.url ) URL.revokeObjectURL( p.url )
-    }
-    photos.value = []
-}
-
-async function onSave ( andAdd ) {
-    if ( !canSave.value ) return
-    saving.value      = true
-    submitError.value = null
-    const capturedPhotos = photos.value.slice()
-
-    try {
-        const res = await createJunk.mutateAsync( {
-            crate_id: props.crateId,
-            name:     autoName.value,
-        } )
-        const junkId = res?.data?.id
-        if ( !junkId ) throw new Error( 'Junk created but no id returned' )
-
-        for ( const photo of capturedPhotos ) {
-            await uploadPhoto.mutateAsync( {
-                junkId,
-                blob:     photo.blob,
-                fileName: 'capture.webp',
-            } )
-        }
-
-        localOffset.value++
-        clearPhotosLocal()
-
-        if ( andAdd ) {
-            return
-        }
-
-        await refetchCount()
-        onDialogOK()
-    }
-    catch ( err ) {
-        submitError.value = err?.body?.error?.message || err.message || 'Save failed'
-    }
-    finally {
-        saving.value = false
-    }
-}
-
-onMounted( () => {
-    if ( isMobile.value && cameraSupported ) {
-        startCamera()
-    }
-} )
-
-onBeforeUnmount( () => {
-    stopCamera()
-    clearPhotosLocal()
+    autoName,
+    photos,
+    saving,
+    errorMessage,
+    atPhotoLimit,
+    canSave,
+    onCapture,
+    removePhoto,
+    save,
+} = useJunkCapture( {
+    crateId: computed( () => props.crateId ),
+    onSaved: () => onDialogOK(),
 } )
 </script>
 

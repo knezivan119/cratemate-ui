@@ -7,34 +7,27 @@
 
         <q-card-section>
             <q-form @submit.prevent="onSubmit" class="q-gutter-md">
-                <q-input
+                <TextInput
                     v-model="form.name"
                     label="Name *"
-                    outlined
                     autofocus
                     :rules="[ val => !!val || 'Name is required' ]"
                 />
 
-                <q-select
+                <SelectInput
                     v-model="form.type"
                     label="Type"
-                    outlined
                     clearable
-                    :options="typeOptions"
-                    emit-value
-                    map-options
+                    :options="crateTypeOptions"
                 />
 
-                <q-input
+                <TextareaInput
                     v-model="form.description"
                     label="Description"
-                    outlined
-                    type="textarea"
-                    autogrow
                 />
 
-                <q-banner v-if="submitError" rounded class="bg-negative text-white">
-                    {{ submitError }}
+                <q-banner v-if="errorMessage" rounded class="bg-negative text-white">
+                    {{ errorMessage }}
                 </q-banner>
 
                 <q-card-actions align="right">
@@ -53,9 +46,13 @@
 </template>
 
 <script setup>
-import { ref, reactive, computed } from 'vue'
+import { computed } from 'vue'
 import { useDialogPluginComponent } from 'quasar'
-import { useCreateCrate, useUpdateCrate } from 'src/queries/crateQuery'
+import { useCrateForm } from 'src/uses/crateFormUse'
+import { crateTypeOptions } from 'src/data/crateTypeData'
+import TextInput     from 'src/components/input/TextInput.vue'
+import TextareaInput from 'src/components/input/TextareaInput.vue'
+import SelectInput   from 'src/components/input/SelectInput.vue'
 
 const props = defineProps( {
     crate: {
@@ -72,52 +69,20 @@ defineEmits( [ ...useDialogPluginComponent.emits ] )
 
 const { dialogRef, onDialogHide, onDialogOK, onDialogCancel } = useDialogPluginComponent()
 
-const createCrate = useCreateCrate()
-const updateCrate = useUpdateCrate()
-
 const isEdit = computed( () => !!props.crate )
 
-const typeOptions = [
-    { label: 'Location', value: 'location' },
-    { label: 'Room',     value: 'room' },
-    { label: 'Crate',    value: 'crate' },
-    { label: 'Person',   value: 'person' },
-    { label: 'Vehicle',  value: 'vehicle' },
-]
-
-const form = reactive( {
-    name:        props.crate?.name        || '',
-    type:        props.crate?.type        || null,
-    description: props.crate?.description || '',
+const {
+    form,
+    saving,
+    errorMessage,
+    submit,
+} = useCrateForm( {
+    crate:    computed( () => props.crate ),
+    parentId: computed( () => props.parentId ),
+    onSaved:  ( saved ) => onDialogOK( saved ),
 } )
 
-const saving      = ref( false )
-const submitError = ref( null )
-
-async function onSubmit () {
-    saving.value      = true
-    submitError.value = null
-    try {
-        let result = null
-        if ( isEdit.value ) {
-            result = await updateCrate.mutateAsync( {
-                id:      props.crate.id,
-                payload: form,
-            } )
-        }
-        else {
-            result = await createCrate.mutateAsync( {
-                ...form,
-                parent_id: props.parentId,
-            } )
-        }
-        onDialogOK( result?.data )
-    }
-    catch ( err ) {
-        submitError.value = err?.body?.error?.message || err.message || 'Save failed'
-    }
-    finally {
-        saving.value = false
-    }
+function onSubmit () {
+    submit()
 }
 </script>

@@ -20,10 +20,15 @@ Rule: **Thing + Kind**, singular noun first, role suffix second. The role suffix
 | Vue pages | `src/pages/` | `ThingPage.vue` (PascalCase) | `JunkDetailPage.vue` |
 | Composables | `src/uses/` | `thingUse.js`, exports `useThing()` | `cameraUse.js`, `junkFormUse.js` |
 | Static config / defaults | `src/defaults/` | `thingDefault.js`, exports `thingDefault` | `inputDefault.js`, `tableDefault.js` |
+| Static reference data | `src/data/` | `thingData.js`, exports `thingData` (+ helpers) | `crateTypeData.js`, `unitData.js` |
 | Pinia stores | `src/stores/` | `thingStore.js`, exports `useThingStore()` | `authStore.js` |
 | TanStack queries | `src/queries/` | `thingQuery.js` | `junkQuery.js`, `crateQuery.js` |
 
 Singular form throughout. `crateQuery.js`, not `cratesQuery.js`. Mirrors `CrateResource`, `JunkController` on the API side.
+
+**`defaults/` vs `data/` — both static, different domain:**
+- `defaults/` — config that shapes how *our* components behave (input defaults, table defaults). Framework-internal.
+- `data/` — domain reference data (units, crate types, status taxonomies). Domain knowledge that the app is *about*. Lookup helpers (e.g. `iconForType`) ship alongside the data they index.
 
 **Why predictability matters here:** the name is a promise about where the thing lives and what it does. When the rule holds across the whole project, you can type the path before finishing the thought ("input defaults" → `defaults/inputDefault.js`). When it's broken in spots — `useX.js` next to `thingStore.js` next to `thing.js` — every lookup demands a context switch and a memory load. For a solo project where the same person writes and reads the code, predictability beats every other naming axis.
 
@@ -81,6 +86,7 @@ ESLint enforces this via `space-in-parens`, `array-bracket-spacing`, `object-cur
 - `src/queries/` — TanStack Query modules (`junkQuery.js`, `crateQuery.js`, `tagQuery.js`)
 - `src/uses/` — composables (`cameraUse.js`, …)
 - `src/defaults/` — static config bags shared across components (`inputDefault.js`, …)
+- `src/data/` — static domain reference data (`crateTypeData.js`, …)
 - `src/components/` — shared components, organised into families (`components/input/TextInput.vue`, dialogs like `CrateFormDialog`)
 - `src/boot/` — Quasar boot files
 - `src/css/app.scss` — global styles
