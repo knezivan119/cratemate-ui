@@ -69,7 +69,7 @@
 <script setup>
 import { ref } from 'vue'
 import { useRouter } from 'vue-router'
-import { useAuthStore } from 'src/stores/auth-store'
+import { useAuthStore } from 'src/stores/authStore'
 
 const leftDrawerOpen = ref( false )
 const authStore      = useAuthStore()

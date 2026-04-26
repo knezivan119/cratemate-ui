@@ -54,7 +54,7 @@
 <script setup>
 import { ref, computed } from 'vue'
 import { useRouter } from 'vue-router'
-import { useJunkList } from 'src/queries/junk'
+import { useJunkList } from 'src/queries/junkQuery'
 
 const router = useRouter()
 const page   = ref( 1 )

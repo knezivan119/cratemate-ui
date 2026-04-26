@@ -173,8 +173,8 @@
 <script setup>
 import { ref, computed, onMounted, onBeforeUnmount } from 'vue'
 import { useDialogPluginComponent, useQuasar } from 'quasar'
-import { useCamera } from 'src/composables/useCamera'
-import { useCreateJunk, useUploadJunkPhoto, useJunkInCrate } from 'src/queries/junk'
+import { useCamera } from 'src/uses/cameraUse'
+import { useCreateJunk, useUploadJunkPhoto, useJunkInCrate } from 'src/queries/junkQuery'
 
 const MAX_PHOTOS = 5
 

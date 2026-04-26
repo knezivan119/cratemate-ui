@@ -49,7 +49,7 @@
 <script setup>
 import { reactive, ref } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
-import { useAuthStore } from 'src/stores/auth-store'
+import { useAuthStore } from 'src/stores/authStore'
 
 const router    = useRouter()
 const route     = useRoute()

@@ -123,7 +123,7 @@
 <script setup>
 import { ref, computed } from 'vue'
 import { useDialogPluginComponent, useQuasar } from 'quasar'
-import { useCrateChildren } from 'src/queries/crates'
+import { useCrateChildren } from 'src/queries/crateQuery'
 import { iconForType } from 'src/utils/crateIcon'
 import CrateFormDialog from 'src/components/CrateFormDialog.vue'
 

@@ -1,7 +1,7 @@
 import { defineRouter } from '#q-app/wrappers'
 import { createRouter, createMemoryHistory, createWebHistory, createWebHashHistory } from 'vue-router'
 import routes from './routes'
-import { useAuthStore } from 'src/stores/auth-store'
+import { useAuthStore } from 'src/stores/authStore'
 
 export default defineRouter( ( /* { store, ssrContext } */ ) => {
     const createHistory = process.env.SERVER

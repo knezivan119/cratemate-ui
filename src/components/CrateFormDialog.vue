@@ -55,7 +55,7 @@
 <script setup>
 import { ref, reactive, computed } from 'vue'
 import { useDialogPluginComponent } from 'quasar'
-import { useCreateCrate, useUpdateCrate } from 'src/queries/crates'
+import { useCreateCrate, useUpdateCrate } from 'src/queries/crateQuery'
 
 const props = defineProps( {
     crate: {

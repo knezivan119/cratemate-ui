@@ -277,16 +277,16 @@
 import { ref, computed, watch, onBeforeUnmount } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useQuasar } from 'quasar'
-import { useCamera } from 'src/composables/useCamera'
+import { useCamera } from 'src/uses/cameraUse'
 import {
     useJunk,
     useUpdateJunk,
     useDeleteJunk,
     useUploadJunkPhoto,
     useDeleteJunkPhoto,
-} from 'src/queries/junk'
-import { useCrate } from 'src/queries/crates'
-import { useTagsList } from 'src/queries/tags'
+} from 'src/queries/junkQuery'
+import { useCrate } from 'src/queries/crateQuery'
+import { useTagsList } from 'src/queries/tagQuery'
 import { iconForType } from 'src/utils/crateIcon'
 import CratePickerDialog from 'src/components/CratePickerDialog.vue'
 

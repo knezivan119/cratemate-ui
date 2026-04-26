@@ -1,7 +1,7 @@
 import { computed, unref } from 'vue'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/vue-query'
 import { apiFetch } from 'src/boot/api'
-import { junkKeys } from 'src/queries/junk'
+import { junkKeys } from 'src/queries/junkQuery'
 
 export const crateKeys = {
     all: [ 'crates' ],
