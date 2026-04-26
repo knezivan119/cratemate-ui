@@ -54,7 +54,11 @@ ddev ssh                      # Shell into the web container
 npm run dev                   # Quasar dev server (inside container or locally)
 npm run build                 # Production build → dist/<APP_ENV>/
 npm run lint                  # ESLint
+npm run test                  # Vitest (composable unit tests)
+npm run test:watch            # Vitest in watch mode
 ```
+
+Tests live under `tests/` mirroring `src/` (`tests/uses/<thing>UseTest.js` for `src/uses/<thing>Use.js`). Discovery pattern is `**/*Test.js` to match the API side's `*Test.php` naming. Composable tests use a small `withSetup` helper from `tests/helpers/withSetupHelper.js` so lifecycle hooks fire inside a real Vue setup-context.
 
 The UI is served at https://cratemate-ui.ddev.site when DDEV is running. The Quasar dev server runs on container port 9000, exposed via DDEV on ports 80/443.
 
