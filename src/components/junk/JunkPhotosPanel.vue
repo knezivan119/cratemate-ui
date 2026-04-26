@@ -7,13 +7,18 @@
             :key="photo.id"
             class="photo-cell"
         >
-            <a :href="photo.url" target="_blank" rel="noopener">
+            <button
+                type="button"
+                class="photo-button"
+                aria-label="View photo"
+                @click="openPhoto( photo )"
+            >
                 <img
                     :src="photo.thumb_url || photo.url"
                     class="photo-thumb"
                     :alt="photo.file_name"
                 />
-            </a>
+            </button>
             <q-btn
                 round
                 dense
@@ -150,12 +155,25 @@
 </template>
 
 <script setup>
+import { useQuasar } from 'quasar'
 import { useJunkPhotoEdit } from 'src/uses/junkPhotoEditUse'
 import SelectInput from 'src/components/input/SelectInput.vue'
+import JunkPhotoLightbox from 'src/components/junk/JunkPhotoLightbox.vue'
+
+const $q = useQuasar()
 
 const props = defineProps( {
     junkId: { type: Object, required: true },  // expects a Ref<string>
 } )
+
+function openPhoto ( photo ) {
+    $q.dialog( {
+        component: JunkPhotoLightbox,
+        componentProps: {
+            photo,
+        },
+    } )
+}
 
 const {
     photos,
@@ -183,8 +201,15 @@ const {
 <style scoped>
 .photos-grid {
     display: grid;
-    grid-template-columns: repeat( auto-fill, minmax( 6rem, 1fr ) );
+    /* xs (smallest): 3 per row. From sm up: 12 per row. Strip-style strip on
+       desktop, comfortably tappable thumbs on mobile. */
+    grid-template-columns: repeat( 3, 1fr );
     gap: 0.5rem;
+}
+@media ( min-width: 37.5rem ) {
+    .photos-grid {
+        grid-template-columns: repeat( 12, 1fr );
+    }
 }
 .photo-cell {
     position: relative;
@@ -192,6 +217,15 @@ const {
     border-radius: 0.375rem;
     overflow: hidden;
     background: #f4f4f4;
+}
+.photo-button {
+    width: 100%;
+    height: 100%;
+    padding: 0;
+    border: none;
+    background: transparent;
+    cursor: pointer;
+    display: block;
 }
 .photo-thumb {
     width: 100%;
