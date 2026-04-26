@@ -1,6 +1,7 @@
 <template>
 <q-dialog
     ref="dialogRef"
+    maximized
     @hide="onDialogHide"
 >
     <q-card class="junk-photo-lightbox">
@@ -38,20 +39,23 @@ const { dialogRef, onDialogHide, onDialogCancel } = useDialogPluginComponent()
 
 <style scoped>
 .junk-photo-lightbox {
-    background: #000;
-    position:   relative;
-    /* The card sizes itself to its content (the image). The image is the
-       sized element — see .lightbox-image below. */
+    background:      #000;
+    width:           100vw;
+    height:          100vh;
+    display:         flex;
+    align-items:     center;
+    justify-content: center;
+    position:        relative;
 }
 .lightbox-image {
-    display:    block;
-    /* The image sizes to its natural dimensions, capped to the viewport so
-       it never overflows. q-dialog's outer wrapper centres it. */
-    max-width:  95vw;
-    max-height: 95vh;
+    /* Bounded by the viewport; preserves aspect ratio. The flex parent
+       centres the image both axes when there's letterboxing. */
+    max-width:  100vw;
+    max-height: 100vh;
     width:      auto;
     height:     auto;
     object-fit: contain;
+    display:    block;
 }
 .close-button {
     position:   absolute;
