@@ -3,9 +3,9 @@ import { useRouter } from 'vue-router'
 import { useQuasar } from 'quasar'
 import { useCrate, useCrateChildren, useUpdateCrate, useDeleteCrate } from 'src/queries/crateQuery'
 import { useJunkListInCrate } from 'src/queries/junkQuery'
-import CrateFormDialog from 'src/components/CrateFormDialog.vue'
-import CratePickerDialog from 'src/components/CratePickerDialog.vue'
-import JunkCaptureDialog from 'src/components/JunkCaptureDialog.vue'
+import CrateFormDialog from 'src/components/crate/CrateFormDialog.vue'
+import CratePickerDialog from 'src/components/crate/CratePickerDialog.vue'
+import JunkCaptureDialog from 'src/components/junk/JunkCaptureDialog.vue'
 
 export function useCrateEdit ( crateId ) {
     const router = useRouter()

@@ -125,7 +125,7 @@ import { computed } from 'vue'
 import { useDialogPluginComponent, useQuasar } from 'quasar'
 import { useCrateDrilldown } from 'src/uses/crateDrilldownUse'
 import { iconForType } from 'src/data/crateTypeData'
-import CrateFormDialog from 'src/components/CrateFormDialog.vue'
+import CrateFormDialog from 'src/components/crate/CrateFormDialog.vue'
 
 defineEmits( [ ...useDialogPluginComponent.emits ] )
 

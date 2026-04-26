@@ -36,26 +36,17 @@
     >
         <q-list>
             <q-item-label header>Navigation</q-item-label>
-
-            <q-item clickable :to="'/'" exact>
+            <q-item
+                v-for="item in sidebarItems"
+                :key="item.name"
+                clickable
+                :to="{ name: item.name }"
+                :exact="item.exact"
+            >
                 <q-item-section avatar>
-                    <q-icon name="dashboard" />
+                    <q-icon :name="item.icon" />
                 </q-item-section>
-                <q-item-section>Dashboard</q-item-section>
-            </q-item>
-
-            <q-item clickable :to="'/crates'">
-                <q-item-section avatar>
-                    <q-icon name="inventory_2" />
-                </q-item-section>
-                <q-item-section>Crates</q-item-section>
-            </q-item>
-
-            <q-item clickable :to="'/junk'">
-                <q-item-section avatar>
-                    <q-icon name="widgets" />
-                </q-item-section>
-                <q-item-section>Junk</q-item-section>
+                <q-item-section>{{ item.label }}</q-item-section>
             </q-item>
         </q-list>
     </q-drawer>
@@ -70,10 +61,25 @@
 import { ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { useAuthStore } from 'src/stores/authStore'
+import routes from 'src/router/routes'
 
 const leftDrawerOpen = ref( false )
 const authStore      = useAuthStore()
 const router         = useRouter()
+
+// Pull every authenticated child-route flagged as `sidebar` straight from the
+// route table. Adding a new sidebar entry is now "set sidebar: true on the
+// route" — no edit here.
+const sidebarItems = routes
+    .find( ( r ) => Array.isArray( r.children ) )
+    .children
+    .filter( ( c ) => c.meta?.sidebar )
+    .map( ( c ) => ( {
+        name:  c.name,
+        label: c.meta.label,
+        icon:  c.meta.icon,
+        exact: !!c.meta.exact,
+    } ) )
 
 function toggleLeftDrawer () {
     leftDrawerOpen.value = !leftDrawerOpen.value

@@ -3,25 +3,18 @@ import { ref, nextTick } from 'vue'
 
 const junkData    = ref( null )
 const junkError   = ref( null )
-const crateData   = ref( null )
-const crateError  = ref( null )
 const tagsData    = ref( { data: [] } )
 const tagsLoading = ref( false )
 
 const updateMutate = vi.fn()
 const deleteMutate = vi.fn()
 
-const dialogOnOk = vi.fn()
-const $qDialog   = vi.fn( () => ( { onOk: ( fn ) => { dialogOnOk.mockImplementation( fn ); return { onOk: dialogOnOk } } } ) )
+const $qDialog = vi.fn( () => ( { onOk: vi.fn() } ) )
 
 vi.mock( 'src/queries/junkQuery', () => ( {
     useJunk:       () => ( { data: junkData,  error: junkError } ),
     useUpdateJunk: () => ( { mutateAsync: updateMutate } ),
     useDeleteJunk: () => ( { mutateAsync: deleteMutate } ),
-} ) )
-
-vi.mock( 'src/queries/crateQuery', () => ( {
-    useCrate: () => ( { data: crateData, error: crateError } ),
 } ) )
 
 vi.mock( 'src/queries/tagQuery', () => ( {
@@ -32,8 +25,6 @@ vi.mock( 'quasar', () => ( {
     useQuasar: () => ( { dialog: $qDialog } ),
 } ) )
 
-vi.mock( 'src/components/CratePickerDialog.vue', () => ( { default: { name: 'CratePickerDialog' } } ) )
-
 import { useJunkEdit } from 'src/uses/junkEditUse'
 import { withSetup } from '../helpers/withSetupHelper'
 
@@ -42,7 +33,7 @@ describe( 'junkEditUse', () => {
 
     beforeEach( () => {
         junkData.value   = null
-        crateData.value  = null
+        junkError.value  = null
         tagsData.value   = { data: [] }
         updateMutate.mockReset()
         deleteMutate.mockReset()
@@ -131,10 +122,4 @@ describe( 'junkEditUse', () => {
         expect( harness.result.loadError.value ).toEqual( { message: 'gone' } )
     } )
 
-    it( 'openCratePicker opens a dialog with the picker component', () => {
-        harness.result.openCratePicker()
-        expect( $qDialog ).toHaveBeenCalledWith( expect.objectContaining( {
-            component: { name: 'CratePickerDialog' },
-        } ) )
-    } )
 } )

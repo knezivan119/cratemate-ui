@@ -45,9 +45,9 @@ vi.mock( 'quasar', () => ( {
     useQuasar: () => ( { dialog: $qDialog, notify: $qNotify } ),
 } ) )
 
-vi.mock( 'src/components/CrateFormDialog.vue',  () => ( { default: { name: 'CrateFormDialog' } } ) )
-vi.mock( 'src/components/CratePickerDialog.vue', () => ( { default: { name: 'CratePickerDialog' } } ) )
-vi.mock( 'src/components/JunkCaptureDialog.vue', () => ( { default: { name: 'JunkCaptureDialog' } } ) )
+vi.mock( 'src/components/crate/CrateFormDialog.vue',  () => ( { default: { name: 'CrateFormDialog' } } ) )
+vi.mock( 'src/components/crate/CratePickerDialog.vue', () => ( { default: { name: 'CratePickerDialog' } } ) )
+vi.mock( 'src/components/junk/JunkCaptureDialog.vue', () => ( { default: { name: 'JunkCaptureDialog' } } ) )
 
 import { useCrateEdit } from 'src/uses/crateEditUse'
 import { withSetup } from '../helpers/withSetupHelper'

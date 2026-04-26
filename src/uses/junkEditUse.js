@@ -5,19 +5,13 @@ import {
     useUpdateJunk,
     useDeleteJunk,
 } from 'src/queries/junkQuery'
-import { useCrate } from 'src/queries/crateQuery'
 import { useTagsList } from 'src/queries/tagQuery'
-import CratePickerDialog from 'src/components/CratePickerDialog.vue'
 
 export function useJunkEdit ( junkId ) {
     const $q = useQuasar()
 
     const { data: junkData, error: junkError } = useJunk( junkId )
     const junk = computed( () => junkData.value?.data )
-
-    const currentCrateId = computed( () => junk.value?.crate_id ?? null )
-    const { data: crateData, error: crateError } = useCrate( currentCrateId )
-    const currentCrate = computed( () => crateData.value?.data )
 
     const { data: tagsData, isLoading: tagsLoading } = useTagsList()
     const tagOptions = computed( () =>
@@ -30,7 +24,7 @@ export function useJunkEdit ( junkId ) {
     const updateJunk = useUpdateJunk()
     const deleteJunk = useDeleteJunk()
 
-    const loadError = computed( () => junkError.value || crateError.value )
+    const loadError = computed( () => junkError.value )
 
     const form = ref( {
         name:        '',
@@ -107,16 +101,8 @@ export function useJunkEdit ( junkId ) {
         } )
     }
 
-    function openCratePicker () {
-        $q.dialog( { component: CratePickerDialog } )
-            .onOk( ( picked ) => {
-                form.value.crate_id = picked.id
-            } )
-    }
-
     return {
         junk,
-        currentCrate,
         tagOptions,
         tagsLoading,
         loadError,
@@ -126,6 +112,5 @@ export function useJunkEdit ( junkId ) {
         errorMessage,
         onSave,
         confirmDelete,
-        openCratePicker,
     }
 }

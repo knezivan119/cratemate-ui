@@ -83,17 +83,23 @@ ESLint enforces this via `space-in-parens`, `array-bracket-spacing`, `object-cur
 
 ## Architecture
 
-- `src/layouts/MainLayout.vue` — app shell with left drawer navigation
-- `src/pages/` — route-level page components, lazy-loaded
-- `src/router/routes.js` — route definitions; route guards via `requiresAuth` / `public` meta
+- `src/router/routes.js` — **source of truth for navigation**. Each route carries `meta: { label, icon, sidebar, ... }`. Sidebars/menus iterate this list rather than maintain their own link tables.
+- `src/layouts/MainLayout.vue` — app shell. Left drawer is generated from `routes.js` (filter `meta.sidebar === true`). Adding a sidebar entry means adding a route, never editing the layout.
+- `src/pages/` — **lean route shells** (~5 lines each). A page reads route params and renders ONE component. No business logic in pages.
+- `src/components/<domain>/` — components organised by domain (`auth/`, `crate/`, `junk/`, `input/`). Inside each domain folder you'll find:
+    - `<Domain>List.vue`, `<Domain><Detail|Edit>View.vue` — the composite views a page renders.
+    - `<Domain><Verb>Form.vue` — pure forms with no dialog wrapper. Drop into a page, dialog, tab, anywhere.
+    - `<Domain><Verb>Dialog.vue` — thin q-dialog shells that host the matching form.
+    - `<Domain><Thing>Widget.vue` / `Panel.vue` — smaller reusable pieces (`JunkCrateWidget`, `JunkPhotosPanel`).
 - `src/stores/` — Pinia stores (`authStore.js`, …)
 - `src/queries/` — TanStack Query modules (`junkQuery.js`, `crateQuery.js`, `tagQuery.js`)
-- `src/uses/` — composables (`cameraUse.js`, …)
+- `src/uses/` — composables (`cameraUse.js`, `junkEditUse.js`, …)
 - `src/defaults/` — static config bags shared across components (`inputDefault.js`, …)
 - `src/data/` — static domain reference data (`crateTypeData.js`, …)
-- `src/components/` — shared components, organised into families (`components/input/TextInput.vue`, dialogs like `CrateFormDialog`)
 - `src/boot/` — Quasar boot files
 - `src/css/app.scss` — global styles
+
+**Page → View → smaller pieces.** A page like `JunkDetailPage.vue` is 5 lines: read `:id` from the route, render `<JunkEditView :junk-id="..." />`. The view composes `<JunkPhotosPanel>`, `<JunkCrateWidget>`, `<JunkEditForm>`. The form is reusable on its own — drop it in a side panel or tab and it works the same.
 
 ## Current State
 
