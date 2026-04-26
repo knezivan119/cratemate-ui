@@ -1,5 +1,5 @@
 <template>
-<q-card style="max-width: 420px; width: 100%;" class="q-mt-xl">
+<q-card style="max-width: 26.25rem; width: 100%;" class="q-mt-xl">
     <q-card-section>
         <div class="text-h5">Log in</div>
         <div class="text-caption text-grey-7">CrateMate</div>

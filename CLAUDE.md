@@ -81,6 +81,12 @@ doSomething( arg )
 
 ESLint enforces this via `space-in-parens`, `array-bracket-spacing`, `object-curly-spacing`, and `computed-property-spacing` rules. Additional style rules: single quotes, no semicolons, stroustrup brace style, 4-space indent.
 
+**British English for our identifiers.** `colour`, `behaviour`, `organise`, `centre`, `analyse`. External APIs (Quasar's `:color` prop, the CSS `color` property, classes like `items-center`) keep their US spellings — that's a contract with the library/standard, not our naming. The bridge happens at the template (`<q-avatar :color="meta.colour" />`).
+
+**No `px` in CSS.** Default unit is **rem**. `px` is only acceptable with explicit justification (e.g. raster-asset alignment). Conversion: 1rem = 16px → 4px = 0.25rem, 8px = 0.5rem, 16px = 1rem, 48px = 3rem, etc. Quasar size props (`size="3rem"`) accept rem directly.
+
+**Templates stay clean.** Spread v-bind objects, inline lambdas, and validation arrays belong in script setup as named computeds/consts/functions. Templates should reference simple identifiers, not parse expressions. See `feedback_clean_templates` memory for the full rule.
+
 ## Architecture
 
 - `src/router/routes.js` — **source of truth for navigation**. Each route carries `meta: { label, icon, sidebar, ... }`. Sidebars/menus iterate this list rather than maintain their own link tables.

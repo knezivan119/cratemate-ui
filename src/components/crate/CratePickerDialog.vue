@@ -70,13 +70,7 @@
                     @click="drillInto( child )"
                 >
                     <q-item-section avatar>
-                        <q-avatar
-                            :color="iconForType( child.type ).color"
-                            text-color="white"
-                            size="40px"
-                        >
-                            <q-icon :name="iconForType( child.type ).icon" />
-                        </q-avatar>
+                        <CrateTypeAvatar :crate="child" size="2.5rem" />
                     </q-item-section>
                     <q-item-section>
                         <q-item-label>{{ child.name }}</q-item-label>
@@ -103,7 +97,7 @@
                     @click="openCreateInPlace"
                 >
                     <q-item-section avatar>
-                        <q-avatar color="primary" text-color="white" size="40px">
+                        <q-avatar color="primary" text-color="white" size="2.5rem">
                             <q-icon name="add" />
                         </q-avatar>
                     </q-item-section>
@@ -124,8 +118,8 @@
 import { computed } from 'vue'
 import { useDialogPluginComponent, useQuasar } from 'quasar'
 import { useCrateDrilldown } from 'src/uses/crateDrilldownUse'
-import { iconForType } from 'src/data/crateTypeData'
 import CrateFormDialog from 'src/components/crate/CrateFormDialog.vue'
+import CrateTypeAvatar from 'src/components/crate/CrateTypeAvatar.vue'
 
 defineEmits( [ ...useDialogPluginComponent.emits ] )
 
@@ -171,7 +165,7 @@ function openCreateInPlace () {
 
 <style scoped>
 .desktop-card {
-    width: 480px;
+    width: 30rem;
     max-width: 95vw;
     max-height: 80vh;
 }

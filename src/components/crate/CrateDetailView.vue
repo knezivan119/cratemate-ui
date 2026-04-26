@@ -22,7 +22,7 @@
             aria-label="Crate actions"
         >
             <q-menu>
-                <q-list style="min-width: 220px">
+                <q-list style="min-width: 13.75rem">
                     <q-item clickable v-close-popup @click="openEdit">
                         <q-item-section avatar><q-icon name="edit" /></q-item-section>
                         <q-item-section>Rename / Edit</q-item-section>
@@ -56,13 +56,7 @@
     </div>
 
     <div v-if="crate?.type" class="q-mb-md">
-        <q-chip
-            :icon="iconForType( crate.type ).icon"
-            :color="iconForType( crate.type ).color"
-            text-color="white"
-        >
-            {{ crate.type }}
-        </q-chip>
+        <CrateTypeChip :crate="crate" />
     </div>
 
     <q-banner v-if="loadError" rounded class="bg-negative text-white q-mb-md">
@@ -81,9 +75,7 @@
                 :to="`/crates/${ child.id }`"
             >
                 <q-item-section avatar>
-                    <q-avatar :color="iconForType( child.type ).color" text-color="white" size="48px">
-                        <q-icon :name="iconForType( child.type ).icon" />
-                    </q-avatar>
+                    <CrateTypeAvatar :crate="child" />
                 </q-item-section>
                 <q-item-section>
                     <q-item-label class="text-body1">{{ child.name }}</q-item-label>
@@ -114,7 +106,7 @@
                 class="gallery-image"
             />
             <div v-else class="gallery-placeholder">
-                <q-icon name="image_not_supported" size="32px" color="grey-5" />
+                <q-icon name="image_not_supported" size="2rem" color="grey-5" />
             </div>
             <div class="gallery-overlay">{{ item.name }}</div>
         </router-link>
@@ -149,7 +141,8 @@
 
 <script setup>
 import { useCrateEdit } from 'src/uses/crateEditUse'
-import { iconForType } from 'src/data/crateTypeData'
+import CrateTypeAvatar from 'src/components/crate/CrateTypeAvatar.vue'
+import CrateTypeChip   from 'src/components/crate/CrateTypeChip.vue'
 
 const props = defineProps( {
     crateId: { type: Object, required: true },  // expects a Ref<string>
@@ -174,13 +167,13 @@ const {
 <style scoped>
 .junk-gallery {
     display: grid;
-    grid-template-columns: repeat( auto-fill, minmax( 120px, 1fr ) );
-    gap: 8px;
+    grid-template-columns: repeat( auto-fill, minmax( 7.5rem, 1fr ) );
+    gap: 0.5rem;
 }
 .gallery-cell {
     position: relative;
     aspect-ratio: 1 / 1;
-    border-radius: 6px;
+    border-radius: 0.375rem;
     overflow: hidden;
     background: #f4f4f4;
     display: block;
@@ -208,8 +201,8 @@ const {
     bottom: 0;
     background: rgba( 0, 0, 0, 0.6 );
     color: #fff;
-    padding: 4px 8px;
-    font-size: 12px;
+    padding: 0.25rem 0.5rem;
+    font-size: 0.75rem;
     line-height: 1.3;
     white-space: nowrap;
     overflow: hidden;

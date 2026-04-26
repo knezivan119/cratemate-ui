@@ -1,6 +1,6 @@
 <template>
 <q-dialog ref="dialogRef" @hide="onDialogHide" persistent>
-    <q-card style="min-width: 320px; max-width: 95vw; width: 480px">
+    <q-card style="min-width: 20rem; max-width: 95vw; width: 30rem">
         <q-card-section>
             <div class="text-h6">{{ isEdit ? 'Edit Crate' : 'New Crate' }}</div>
         </q-card-section>

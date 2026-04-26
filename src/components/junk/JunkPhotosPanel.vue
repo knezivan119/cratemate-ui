@@ -32,7 +32,7 @@
             class="photo-cell photo-add"
             @click="openAddPhoto"
         >
-            <q-icon name="add_a_photo" size="32px" />
+            <q-icon name="add_a_photo" size="2rem" />
             <div class="text-caption q-mt-xs">Add photo</div>
         </button>
     </div>
@@ -86,7 +86,7 @@
                     class="camera-preview"
                 />
                 <div v-if="!streaming" class="camera-placeholder column flex-center text-grey-5">
-                    <q-icon name="videocam_off" size="48px" />
+                    <q-icon name="videocam_off" size="3rem" />
                     <div class="q-mt-sm text-caption">Camera off</div>
                 </div>
             </div>
@@ -183,13 +183,13 @@ const {
 <style scoped>
 .photos-grid {
     display: grid;
-    grid-template-columns: repeat( auto-fill, minmax( 96px, 1fr ) );
-    gap: 8px;
+    grid-template-columns: repeat( auto-fill, minmax( 6rem, 1fr ) );
+    gap: 0.5rem;
 }
 .photo-cell {
     position: relative;
     aspect-ratio: 1 / 1;
-    border-radius: 6px;
+    border-radius: 0.375rem;
     overflow: hidden;
     background: #f4f4f4;
 }
@@ -201,11 +201,11 @@ const {
 }
 .photo-remove {
     position: absolute;
-    top: 4px;
-    right: 4px;
+    top: 0.25rem;
+    right: 0.25rem;
 }
 .photo-add {
-    border: 2px dashed #ccc;
+    border: 0.125rem dashed #ccc;
     background: transparent;
     display: flex;
     flex-direction: column;
@@ -220,10 +220,10 @@ const {
 }
 .camera-frame {
     width: 100%;
-    max-width: 480px;
+    max-width: 30rem;
     aspect-ratio: 1 / 1;
     background: #000;
-    border-radius: 8px;
+    border-radius: 0.5rem;
     overflow: hidden;
     position: relative;
 }

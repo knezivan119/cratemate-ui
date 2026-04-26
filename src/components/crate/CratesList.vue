@@ -18,9 +18,7 @@
             :to="`/crates/${ crate.id }`"
         >
             <q-item-section avatar>
-                <q-avatar :color="iconForType( crate.type ).color" text-color="white" size="48px">
-                    <q-icon :name="iconForType( crate.type ).icon" />
-                </q-avatar>
+                <CrateTypeAvatar :crate="crate" />
             </q-item-section>
 
             <q-item-section>
@@ -58,8 +56,8 @@
 import { computed } from 'vue'
 import { useQuasar } from 'quasar'
 import { useCrateChildren } from 'src/queries/crateQuery'
-import { iconForType } from 'src/data/crateTypeData'
 import CrateFormDialog from 'src/components/crate/CrateFormDialog.vue'
+import CrateTypeAvatar from 'src/components/crate/CrateTypeAvatar.vue'
 
 const $q = useQuasar()
 

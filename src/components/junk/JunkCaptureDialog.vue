@@ -58,7 +58,7 @@
                     v-if="!streaming"
                     class="camera-placeholder column flex-center text-grey-5"
                 >
-                    <q-icon name="videocam_off" size="48px" />
+                    <q-icon name="videocam_off" size="3rem" />
                     <div class="q-mt-sm text-caption">
                         {{ cameraSupported ? 'Camera off' : 'Camera unavailable' }}
                     </div>
@@ -218,7 +218,7 @@ const {
 
 <style scoped>
 .desktop-card {
-    width: 640px;
+    width: 40rem;
     max-width: 95vw;
     max-height: 90vh;
 }
@@ -226,7 +226,7 @@ const {
     width: 100%;
     aspect-ratio: 1 / 1;
     background: #000;
-    border-radius: 8px;
+    border-radius: 0.5rem;
     overflow: hidden;
     position: relative;
 }
@@ -244,12 +244,12 @@ const {
     width: 100%;
     aspect-ratio: 1 / 1;
     object-fit: cover;
-    border-radius: 6px;
+    border-radius: 0.375rem;
     display: block;
 }
 .thumb-remove {
     position: absolute;
-    top: 4px;
-    right: 4px;
+    top: 0.25rem;
+    right: 0.25rem;
 }
 </style>

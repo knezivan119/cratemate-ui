@@ -30,7 +30,7 @@
                 <q-icon
                     v-else
                     name="image_not_supported"
-                    size="32px"
+                    size="2rem"
                     color="grey-5"
                 />
             </q-td>
@@ -99,9 +99,9 @@ function onRowClick ( _evt, row ) {
 <style scoped>
 .row-thumb {
     display: block;
-    width: 48px;
-    height: 48px;
+    width: 3rem;
+    height: 3rem;
     object-fit: cover;
-    border-radius: 4px;
+    border-radius: 0.25rem;
 }
 </style>
