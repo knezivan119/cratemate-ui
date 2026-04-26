@@ -155,6 +155,7 @@
 </template>
 
 <script setup>
+import { computed } from 'vue'
 import { useQuasar } from 'quasar'
 import { useJunkPhotoEdit } from 'src/uses/junkPhotoEditUse'
 import SelectInput from 'src/components/input/SelectInput.vue'
@@ -163,8 +164,14 @@ import JunkPhotoLightbox from 'src/components/junk/JunkPhotoLightbox.vue'
 const $q = useQuasar()
 
 const props = defineProps( {
-    junkId: { type: Object, required: true },  // expects a Ref<string>
+    junkId: {
+        type:     String,
+        required: true,
+    },
 } )
+
+// Composables expect a Ref<string>; props are values. Wrap at the boundary.
+const junkIdRef = computed( () => props.junkId )
 
 function openPhoto ( photo ) {
     $q.dialog( {
@@ -195,7 +202,7 @@ const {
     startCamera,
     stopCamera,
     restartIfStreaming,
-} = useJunkPhotoEdit( props.junkId )
+} = useJunkPhotoEdit( junkIdRef )
 </script>
 
 <style scoped>

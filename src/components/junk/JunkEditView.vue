@@ -40,6 +40,7 @@
 </template>
 
 <script setup>
+import { computed } from 'vue'
 import { useRouter } from 'vue-router'
 import { useJunkEdit } from 'src/uses/junkEditUse'
 import JunkPhotosPanel from 'src/components/junk/JunkPhotosPanel.vue'
@@ -47,10 +48,16 @@ import JunkCrateWidget from 'src/components/junk/JunkCrateWidget.vue'
 import JunkEditForm    from 'src/components/junk/JunkEditForm.vue'
 
 const props = defineProps( {
-    junkId: { type: Object, required: true },  // expects a Ref<string>
+    junkId: {
+        type:     String,
+        required: true,
+    },
 } )
 
 const router = useRouter()
+
+// Composables expect a Ref<string>; props are values. Wrap at the boundary.
+const junkIdRef = computed( () => props.junkId )
 
 const {
     junk,
@@ -63,7 +70,7 @@ const {
     errorMessage,
     onSave,
     confirmDelete,
-} = useJunkEdit( props.junkId )
+} = useJunkEdit( junkIdRef )
 
 function goBack () {
     if ( window.history.length > 1 ) router.back()

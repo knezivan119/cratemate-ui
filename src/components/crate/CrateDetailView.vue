@@ -144,14 +144,21 @@
 </template>
 
 <script setup>
+import { computed } from 'vue'
 import { useCrateEdit } from 'src/uses/crateEditUse'
 import CrateTypeAvatar from 'src/components/crate/CrateTypeAvatar.vue'
 import CrateTypeChip   from 'src/components/crate/CrateTypeChip.vue'
 import CrateNumber     from 'src/components/crate/CrateNumber.vue'
 
 const props = defineProps( {
-    crateId: { type: Object, required: true },  // expects a Ref<string>
+    crateId: {
+        type:     String,
+        required: true,
+    },
 } )
+
+// Composables expect a Ref<string>; props are values. Wrap at the boundary.
+const crateIdRef = computed( () => props.crateId )
 
 const {
     crate,
@@ -166,7 +173,7 @@ const {
     openMove,
     moveToRoot,
     confirmDelete,
-} = useCrateEdit( props.crateId )
+} = useCrateEdit( crateIdRef )
 </script>
 
 <style scoped>
