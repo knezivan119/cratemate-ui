@@ -15,24 +15,32 @@ let dialogOnOkCallback = null
 const $qDialog = vi.fn( () => ( {
     onOk: ( fn ) => {
         dialogOnOkCallback = fn
-        return { onOk: vi.fn() }
+        return {
+            onOk: vi.fn(),
+        }
     },
 } ) )
 
 vi.mock( 'src/queries/junkQuery', () => ( {
-    useJunk:             () => ( { data: junkData } ),
-    useUploadJunkPhoto:  () => ( { mutateAsync: uploadMutate } ),
-    useDeleteJunkPhoto:  () => ( { mutateAsync: deleteMutate } ),
+    useJunk: () => ( {
+        data: junkData,
+    } ),
+    useUploadJunkPhoto: () => ( {
+        mutateAsync: uploadMutate,
+    } ),
+    useDeleteJunkPhoto: () => ( {
+        mutateAsync: deleteMutate,
+    } ),
 } ) )
 
 vi.mock( 'src/uses/cameraUse', () => ( {
     useCamera: () => ( {
-        videoEl:   ref( null ),
-        streaming: ref( false ),
-        error:     ref( null ),
-        devices:   ref( [] ),
-        deviceId:  ref( null ),
-        supported: true,
+        videoEl:            ref( null ),
+        streaming:          ref( false ),
+        error:              ref( null ),
+        devices:            ref( [] ),
+        deviceId:           ref( null ),
+        supported:          true,
         startCamera:        cameraStartCamera,
         stopCamera:         cameraStopCamera,
         capture:            cameraCapture,
@@ -42,7 +50,9 @@ vi.mock( 'src/uses/cameraUse', () => ( {
 } ) )
 
 vi.mock( 'quasar', () => ( {
-    useQuasar: () => ( { dialog: $qDialog } ),
+    useQuasar: () => ( {
+        dialog: $qDialog,
+    } ),
 } ) )
 
 import { useJunkPhotoEdit } from 'src/uses/junkPhotoEditUse'
@@ -70,7 +80,18 @@ describe( 'junkPhotoEditUse', () => {
     } )
 
     it( 'photos derives from the junk query', async () => {
-        junkData.value = { data: { photos: [ { id: 'p1' }, { id: 'p2' } ] } }
+        junkData.value = {
+            data: {
+                photos: [
+                    {
+                        id: 'p1',
+                    },
+                    {
+                        id: 'p2',
+                    },
+                ],
+            },
+        }
         await nextTick()
         expect( harness.result.photos.value ).toHaveLength( 2 )
     } )
@@ -128,7 +149,9 @@ describe( 'junkPhotoEditUse', () => {
     it( 'confirmRemovePhoto opens a confirmation dialog; on OK deletes the photo', async () => {
         deleteMutate.mockResolvedValue( {} )
 
-        harness.result.confirmRemovePhoto( { id: 'p1' } )
+        harness.result.confirmRemovePhoto( {
+            id: 'p1',
+        } )
         expect( $qDialog ).toHaveBeenCalled()
         expect( typeof dialogOnOkCallback ).toBe( 'function' )
 
@@ -141,7 +164,13 @@ describe( 'junkPhotoEditUse', () => {
 
     it( 'upload failure sets errorMessage', async () => {
         cameraCapture.mockResolvedValue( new Blob( [ 'x' ] ) )
-        uploadMutate.mockRejectedValue( { body: { error: { message: 'nope' } } } )
+        uploadMutate.mockRejectedValue( {
+            body: {
+                error: {
+                    message: 'nope',
+                },
+            },
+        } )
 
         await harness.result.captureAndUpload()
         expect( harness.result.errorMessage.value ).toBe( 'nope' )

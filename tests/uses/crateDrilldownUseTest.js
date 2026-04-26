@@ -5,7 +5,9 @@ import { ref } from 'vue'
 // up the stub when it imports useCrateChildren.
 vi.mock( 'src/queries/crateQuery', () => ( {
     useCrateChildren: vi.fn( () => ( {
-        data:      ref( { data: [] } ),
+        data: ref( {
+            data: [],
+        } ),
         error:     ref( null ),
         isLoading: ref( false ),
     } ) ),
@@ -34,20 +36,40 @@ describe( 'crateDrilldownUse', () => {
 
     it( 'drillInto pushes onto path and updates currentEntry', () => {
         const { drillInto, path, currentEntry, currentId } = harness.result
-        drillInto( { id: 'a', name: 'House', type: 'location' } )
+        drillInto( {
+            id:   'a',
+            name: 'House',
+            type: 'location',
+        } )
         expect( path.value ).toHaveLength( 1 )
-        expect( currentEntry.value ).toEqual( { id: 'a', name: 'House', type: 'location' } )
+        expect( currentEntry.value ).toEqual( {
+            id:   'a',
+            name: 'House',
+            type: 'location',
+        } )
         expect( currentId.value ).toBe( 'a' )
 
-        drillInto( { id: 'b', name: 'Garage', type: 'room' } )
+        drillInto( {
+            id:   'b',
+            name: 'Garage',
+            type: 'room',
+        } )
         expect( path.value ).toHaveLength( 2 )
         expect( currentEntry.value.id ).toBe( 'b' )
     } )
 
     it( 'goUp pops the last entry', () => {
         const { drillInto, goUp, path, currentEntry } = harness.result
-        drillInto( { id: 'a', name: 'House', type: 'location' } )
-        drillInto( { id: 'b', name: 'Garage', type: 'room' } )
+        drillInto( {
+            id:   'a',
+            name: 'House',
+            type: 'location',
+        } )
+        drillInto( {
+            id:   'b',
+            name: 'Garage',
+            type: 'room',
+        } )
 
         goUp()
         expect( path.value ).toHaveLength( 1 )
@@ -66,9 +88,18 @@ describe( 'crateDrilldownUse', () => {
 
     it( 'goToDepth truncates path at the given index', () => {
         const { drillInto, goToDepth, path } = harness.result
-        drillInto( { id: 'a', name: 'A' } )
-        drillInto( { id: 'b', name: 'B' } )
-        drillInto( { id: 'c', name: 'C' } )
+        drillInto( {
+            id:   'a',
+            name: 'A',
+        } )
+        drillInto( {
+            id:   'b',
+            name: 'B',
+        } )
+        drillInto( {
+            id:   'c',
+            name: 'C',
+        } )
 
         goToDepth( 0 )
         expect( path.value.map( ( e ) => e.id ) ).toEqual( [ 'a' ] )
@@ -76,8 +107,14 @@ describe( 'crateDrilldownUse', () => {
 
     it( 'reset clears the entire path', () => {
         const { drillInto, reset, path, currentEntry } = harness.result
-        drillInto( { id: 'a', name: 'A' } )
-        drillInto( { id: 'b', name: 'B' } )
+        drillInto( {
+            id:   'a',
+            name: 'A',
+        } )
+        drillInto( {
+            id:   'b',
+            name: 'B',
+        } )
 
         reset()
         expect( path.value ).toEqual( [] )

@@ -1,10 +1,14 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
 import { ref } from 'vue'
 
-const createMutate = vi.fn()
-const uploadMutate = vi.fn()
-const refetchCount = vi.fn()
-const crateJunkData = ref( { meta: { total: 3 } } )
+const createMutate  = vi.fn()
+const uploadMutate  = vi.fn()
+const refetchCount  = vi.fn()
+const crateJunkData = ref( {
+    meta: {
+        total: 3,
+    },
+} )
 
 const cameraCapture = vi.fn()
 const cameraStop    = vi.fn()
@@ -12,19 +16,26 @@ const cameraStart   = vi.fn()
 const cameraClear   = vi.fn()
 
 vi.mock( 'src/queries/junkQuery', () => ( {
-    useCreateJunk:      () => ( { mutateAsync: createMutate } ),
-    useUploadJunkPhoto: () => ( { mutateAsync: uploadMutate } ),
-    useJunkInCrate:     () => ( { data: crateJunkData, refetch: refetchCount } ),
+    useCreateJunk: () => ( {
+        mutateAsync: createMutate,
+    } ),
+    useUploadJunkPhoto: () => ( {
+        mutateAsync: uploadMutate,
+    } ),
+    useJunkInCrate: () => ( {
+        data:    crateJunkData,
+        refetch: refetchCount,
+    } ),
 } ) )
 
 vi.mock( 'src/uses/cameraUse', () => ( {
     useCamera: () => ( {
-        videoEl:   ref( null ),
-        streaming: ref( false ),
-        error:     ref( null ),
-        devices:   ref( [] ),
-        deviceId:  ref( null ),
-        supported: false,
+        videoEl:            ref( null ),
+        streaming:          ref( false ),
+        error:              ref( null ),
+        devices:            ref( [] ),
+        deviceId:           ref( null ),
+        supported:          false,
         startCamera:        cameraStart,
         stopCamera:         cameraStop,
         capture:            cameraCapture,
@@ -34,7 +45,13 @@ vi.mock( 'src/uses/cameraUse', () => ( {
 } ) )
 
 vi.mock( 'quasar', () => ( {
-    useQuasar: () => ( { platform: { is: { mobile: false } } } ),
+    useQuasar: () => ( {
+        platform: {
+            is: {
+                mobile: false,
+            },
+        },
+    } ),
 } ) )
 
 // jsdom/happy-dom provides URL.createObjectURL but not always revokeObjectURL.
@@ -52,7 +69,11 @@ describe( 'junkCaptureUse', () => {
         uploadMutate.mockReset()
         refetchCount.mockReset().mockResolvedValue()
         cameraCapture.mockReset()
-        crateJunkData.value = { meta: { total: 3 } }
+        crateJunkData.value = {
+            meta: {
+                total: 3,
+            },
+        }
         onSaved = vi.fn()
 
         crateIdRef = ref( 'crate-1' )
@@ -109,7 +130,11 @@ describe( 'junkCaptureUse', () => {
         await harness.result.onCapture()
         await harness.result.onCapture()
 
-        createMutate.mockResolvedValue( { data: { id: 'new-junk' } } )
+        createMutate.mockResolvedValue( {
+            data: {
+                id: 'new-junk',
+            },
+        } )
         uploadMutate.mockResolvedValue( {} )
 
         await harness.result.save( false )
@@ -126,7 +151,11 @@ describe( 'junkCaptureUse', () => {
         cameraCapture.mockResolvedValue( new Blob( [ 'x' ] ) )
         await harness.result.onCapture()
 
-        createMutate.mockResolvedValue( { data: { id: 'new-junk' } } )
+        createMutate.mockResolvedValue( {
+            data: {
+                id: 'new-junk',
+            },
+        } )
         uploadMutate.mockResolvedValue( {} )
 
         await harness.result.save( true )
@@ -145,7 +174,13 @@ describe( 'junkCaptureUse', () => {
         cameraCapture.mockResolvedValue( new Blob( [ 'x' ] ) )
         await harness.result.onCapture()
 
-        createMutate.mockRejectedValue( { body: { error: { message: 'oops' } } } )
+        createMutate.mockRejectedValue( {
+            body: {
+                error: {
+                    message: 'oops',
+                },
+            },
+        } )
 
         await harness.result.save( false )
         expect( harness.result.errorMessage.value ).toBe( 'oops' )

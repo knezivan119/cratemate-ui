@@ -9,7 +9,11 @@ import { withSetup } from '../helpers/withSetupHelper'
 // here because happy-dom's canvas implementation is not full-fidelity.
 
 function makeStream () {
-    const tracks = [ { stop: vi.fn() } ]
+    const tracks = [
+        {
+            stop: vi.fn(),
+        },
+    ]
     return {
         getTracks: () => tracks,
         _tracks:   tracks,
@@ -20,13 +24,19 @@ describe( 'cameraUse', () => {
     let harness, getUserMedia, enumerateDevices
 
     beforeEach( () => {
-        getUserMedia      = vi.fn()
-        enumerateDevices  = vi.fn().mockResolvedValue( [] )
+        getUserMedia     = vi.fn()
+        enumerateDevices = vi.fn().mockResolvedValue( [] )
 
         // Patch navigator.mediaDevices and isSecureContext for `supported` detection.
-        Object.defineProperty( window, 'isSecureContext', { value: true, configurable: true } )
+        Object.defineProperty( window, 'isSecureContext', {
+            value:        true,
+            configurable: true,
+        } )
         Object.defineProperty( navigator, 'mediaDevices', {
-            value: { getUserMedia, enumerateDevices },
+            value: {
+                getUserMedia,
+                enumerateDevices,
+            },
             configurable: true,
         } )
 
@@ -52,20 +62,34 @@ describe( 'cameraUse', () => {
         const stream = makeStream()
         getUserMedia.mockResolvedValue( stream )
         enumerateDevices.mockResolvedValue( [
-            { kind: 'videoinput', deviceId: 'cam-1', label: 'Front' },
-            { kind: 'audioinput', deviceId: 'mic-1', label: 'Mic' },
+            {
+                kind:     'videoinput',
+                deviceId: 'cam-1',
+                label:    'Front',
+            },
+            {
+                kind:     'audioinput',
+                deviceId: 'mic-1',
+                label:    'Mic',
+            },
         ] )
 
         await harness.result.startCamera()
 
         expect( harness.result.streaming.value ).toBe( true )
         expect( harness.result.devices.value ).toEqual( [
-            { kind: 'videoinput', deviceId: 'cam-1', label: 'Front' },
+            {
+                kind:     'videoinput',
+                deviceId: 'cam-1',
+                label:    'Front',
+            },
         ] )
     } )
 
     it( 'startCamera failure sets error and leaves streaming false', async () => {
-        getUserMedia.mockRejectedValue( Object.assign( new Error( 'denied' ), { name: 'NotAllowedError' } ) )
+        getUserMedia.mockRejectedValue( Object.assign( new Error( 'denied' ), {
+            name: 'NotAllowedError',
+        } ) )
 
         await harness.result.startCamera()
 

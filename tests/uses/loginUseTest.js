@@ -2,15 +2,21 @@ import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
 
 const routerReplace = vi.fn()
 const authLogin     = vi.fn()
-const routeRef      = { query: {} }
+const routeRef = {
+    query: {},
+}
 
 vi.mock( 'vue-router', () => ( {
-    useRouter: () => ( { replace: routerReplace } ),
-    useRoute:  () => routeRef,
+    useRouter: () => ( {
+        replace: routerReplace,
+    } ),
+    useRoute: () => routeRef,
 } ) )
 
 vi.mock( 'src/stores/authStore', () => ( {
-    useAuthStore: () => ( { login: authLogin } ),
+    useAuthStore: () => ( {
+        login: authLogin,
+    } ),
 } ) )
 
 import { useLogin } from 'src/uses/loginUse'
@@ -57,14 +63,20 @@ describe( 'loginUse', () => {
 
     it( 'submit on success redirects to query.redirect when present', async () => {
         authLogin.mockResolvedValue()
-        routeRef.query = { redirect: '/junk/123' }
+        routeRef.query = {
+            redirect: '/junk/123',
+        }
         await harness.result.submit()
         expect( routerReplace ).toHaveBeenCalledWith( '/junk/123' )
     } )
 
     it( 'submit failure sets errorMessage and does not redirect', async () => {
         authLogin.mockRejectedValue( {
-            body: { error: { message: 'Bad creds' } },
+            body: {
+                error: {
+                    message: 'Bad creds',
+                },
+            },
         } )
         const { submit, errorMessage } = harness.result
         await submit()
