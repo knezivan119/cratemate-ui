@@ -2,9 +2,9 @@
 <q-form @submit.prevent="onSubmit" class="crate-edit-form q-gutter-md">
     <TextInput
         v-model="form.name"
-        label="Name *"
+        label="Name"
+        placeholder="Optional — auto-named Crate #N if blank"
         autofocus
-        :rules="nameRules"
     />
 
     <SelectInput
@@ -57,8 +57,6 @@ const props = defineProps( {
 const emit = defineEmits( [ 'saved', 'cancel' ] )
 
 const isEdit = computed( () => !!props.crate )
-
-const nameRules = [ ( val ) => !!val || 'Name is required' ]
 
 const {
     form,

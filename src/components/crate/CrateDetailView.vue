@@ -11,6 +11,7 @@
             aria-label="Back"
         />
         <div class="text-h5 ellipsis col">
+            <CrateNumber v-if="crate" :crate="crate" class="q-mr-sm" />
             {{ crate?.name || 'Loading…' }}
         </div>
         <q-btn
@@ -78,7 +79,10 @@
                     <CrateTypeAvatar :crate="child" />
                 </q-item-section>
                 <q-item-section>
-                    <q-item-label class="text-body1">{{ child.name }}</q-item-label>
+                    <q-item-label class="text-body1">
+                        <CrateNumber :crate="child" class="q-mr-sm" />
+                        {{ child.name }}
+                    </q-item-label>
                     <q-item-label v-if="child.type" caption>{{ child.type }}</q-item-label>
                 </q-item-section>
                 <q-item-section side>
@@ -143,6 +147,7 @@
 import { useCrateEdit } from 'src/uses/crateEditUse'
 import CrateTypeAvatar from 'src/components/crate/CrateTypeAvatar.vue'
 import CrateTypeChip   from 'src/components/crate/CrateTypeChip.vue'
+import CrateNumber     from 'src/components/crate/CrateNumber.vue'
 
 const props = defineProps( {
     crateId: { type: Object, required: true },  // expects a Ref<string>

@@ -73,7 +73,10 @@
                         <CrateTypeAvatar :crate="child" size="2.5rem" />
                     </q-item-section>
                     <q-item-section>
-                        <q-item-label>{{ child.name }}</q-item-label>
+                        <q-item-label>
+                            <CrateNumber :crate="child" class="q-mr-sm" />
+                            {{ child.name }}
+                        </q-item-label>
                         <q-item-label v-if="child.type" caption>{{ child.type }}</q-item-label>
                     </q-item-section>
                     <q-item-section side>
@@ -120,6 +123,7 @@ import { useDialogPluginComponent, useQuasar } from 'quasar'
 import { useCrateDrilldown } from 'src/uses/crateDrilldownUse'
 import CrateFormDialog from 'src/components/crate/CrateFormDialog.vue'
 import CrateTypeAvatar from 'src/components/crate/CrateTypeAvatar.vue'
+import CrateNumber     from 'src/components/crate/CrateNumber.vue'
 
 defineEmits( [ ...useDialogPluginComponent.emits ] )
 

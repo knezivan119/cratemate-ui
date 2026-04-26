@@ -22,7 +22,10 @@
             </q-item-section>
 
             <q-item-section>
-                <q-item-label class="text-body1">{{ crate.name }}</q-item-label>
+                <q-item-label class="text-body1">
+                    <CrateNumber :crate="crate" class="q-mr-sm" />
+                    {{ crate.name }}
+                </q-item-label>
                 <q-item-label v-if="crate.type" caption>{{ crate.type }}</q-item-label>
             </q-item-section>
 
@@ -58,6 +61,7 @@ import { useQuasar } from 'quasar'
 import { useCrateChildren } from 'src/queries/crateQuery'
 import CrateFormDialog from 'src/components/crate/CrateFormDialog.vue'
 import CrateTypeAvatar from 'src/components/crate/CrateTypeAvatar.vue'
+import CrateNumber     from 'src/components/crate/CrateNumber.vue'
 
 const $q = useQuasar()
 

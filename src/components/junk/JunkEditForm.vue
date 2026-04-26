@@ -1,41 +1,43 @@
 <template>
 <q-form @submit.prevent="emit( 'save' )" class="junk-edit-form q-gutter-md">
-    <TextInput
-        v-model="form.name"
-        label="Name"
-        :rules="nameRules"
-    />
-
-    <TextareaInput
-        v-model="form.description"
-        label="Description"
-    />
-
     <div class="row q-col-gutter-md">
+
+        <TextInput
+            v-model="form.name"
+            label="Name"
+            :rules="nameRules"
+            cols="6"
+        />
+
+
         <NumberInput
             v-model="form.quantity"
             label="Quantity"
             min="1"
-            cols="6"
+            cols="3"
         />
         <TextInput
             v-model="form.unit"
             label="Unit"
             placeholder="ea"
             maxlength="16"
-            cols="6"
+            cols="3"
+        />
+
+        <TextareaInput
+            v-model="form.description"
+            label="Description"
+        />
+        <SelectInput
+            v-model="form.tags"
+            :options="tagOptions"
+            label="Tags"
+            multiple
+            use-chips
+            clearable
+            :loading="tagsLoading"
         />
     </div>
-
-    <SelectInput
-        v-model="form.tags"
-        :options="tagOptions"
-        label="Tags"
-        multiple
-        use-chips
-        clearable
-        :loading="tagsLoading"
-    />
 
     <q-banner v-if="errorMessage" rounded class="bg-negative text-white">
         {{ errorMessage }}

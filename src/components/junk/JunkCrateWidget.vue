@@ -1,5 +1,5 @@
 <template>
-<q-card flat bordered class="junk-crate-widget">
+<q-card flat class="junk-crate-widget">
     <q-card-section class="row items-center q-py-sm">
         <CrateTypeAvatar
             :crate="currentCrate"
@@ -7,7 +7,10 @@
             class="q-mr-md"
         />
         <div class="col">
-            <div>{{ currentCrate?.name || '…' }}</div>
+            <div>
+                <CrateNumber v-if="currentCrate" :crate="currentCrate" class="q-mr-sm" />
+                {{ currentCrate?.name || '…' }}
+            </div>
             <div v-if="currentCrate?.type" class="text-caption text-grey-7">
                 {{ currentCrate.type }}
             </div>
@@ -29,6 +32,7 @@ import { useQuasar } from 'quasar'
 import { useCrate } from 'src/queries/crateQuery'
 import CratePickerDialog from 'src/components/crate/CratePickerDialog.vue'
 import CrateTypeAvatar from 'src/components/crate/CrateTypeAvatar.vue'
+import CrateNumber     from 'src/components/crate/CrateNumber.vue'
 
 // v-model on the crate id — anyone with a crate-id ref can drop this widget in
 // and get "show current crate + change via picker dialog" out of the box.
