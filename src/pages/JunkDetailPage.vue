@@ -142,15 +142,12 @@
                     </template>
                 </div>
 
-                <q-select
+                <SelectInput
                     v-if="streaming && deviceOptions.length > 1"
                     v-model="deviceId"
                     :options="deviceOptions"
                     label="Camera"
-                    outlined
                     dense
-                    emit-value
-                    map-options
                     class="q-mb-md"
                     @update:model-value="restartIfStreaming"
                 />
@@ -198,57 +195,47 @@
 
         <!-- Fields -->
         <q-form @submit.prevent="onSave" class="q-gutter-md">
-            <q-input
+            <TextInput
                 v-model="form.name"
                 label="Name"
-                outlined
                 :rules="[ val => !!val || 'Name is required' ]"
             />
 
-            <q-input
+            <TextareaInput
                 v-model="form.description"
                 label="Description"
-                outlined
-                type="textarea"
-                autogrow
             />
 
             <div class="row q-col-gutter-md">
                 <div class="col-6">
-                    <q-input
-                        v-model.number="form.quantity"
+                    <NumberInput
+                        v-model="form.quantity"
                         label="Quantity"
-                        outlined
-                        type="number"
                         min="1"
                     />
                 </div>
                 <div class="col-6">
-                    <q-input
+                    <TextInput
                         v-model="form.unit"
                         label="Unit"
-                        outlined
                         placeholder="ea"
                         maxlength="16"
                     />
                 </div>
             </div>
 
-            <q-select
+            <SelectInput
                 v-model="form.tags"
                 :options="tagOptions"
                 label="Tags"
-                outlined
                 multiple
-                emit-value
-                map-options
                 use-chips
                 clearable
                 :loading="tagsLoading"
             />
 
-            <q-banner v-if="submitError" rounded class="bg-negative text-white">
-                {{ submitError }}
+            <q-banner v-if="bannerError" rounded class="bg-negative text-white">
+                {{ bannerError }}
             </q-banner>
 
             <div class="row q-gutter-sm">
@@ -265,7 +252,7 @@
                     color="negative"
                     icon="delete"
                     label="Delete"
-                    @click="confirmDelete"
+                    @click="confirmDelete( () => router.replace( '/junk' ) )"
                 />
             </div>
         </q-form>
@@ -274,238 +261,63 @@
 </template>
 
 <script setup>
-import { ref, computed, watch, onBeforeUnmount } from 'vue'
+import { computed } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
-import { useQuasar } from 'quasar'
-import { useCamera } from 'src/uses/cameraUse'
-import {
-    useJunk,
-    useUpdateJunk,
-    useDeleteJunk,
-    useUploadJunkPhoto,
-    useDeleteJunkPhoto,
-} from 'src/queries/junkQuery'
-import { useCrate } from 'src/queries/crateQuery'
-import { useTagsList } from 'src/queries/tagQuery'
-import { iconForType } from 'src/utils/crateIcon'
-import CratePickerDialog from 'src/components/CratePickerDialog.vue'
+import { useJunkEdit }      from 'src/uses/junkEditUse'
+import { useJunkPhotoEdit } from 'src/uses/junkPhotoEditUse'
+import { iconForType }      from 'src/utils/crateIcon'
+import TextInput     from 'src/components/input/TextInput.vue'
+import NumberInput   from 'src/components/input/NumberInput.vue'
+import TextareaInput from 'src/components/input/TextareaInput.vue'
+import SelectInput   from 'src/components/input/SelectInput.vue'
 
 const route  = useRoute()
 const router = useRouter()
-const $q     = useQuasar()
-
 const junkId = computed( () => route.params.id )
 
-const { data: junkData, error: junkError } = useJunk( junkId )
-const junk   = computed( () => junkData.value?.data )
-const photos = computed( () => junk.value?.photos ?? [] )
-
-const currentCrateId = computed( () => junk.value?.crate_id ?? null )
-const { data: crateData, error: crateError } = useCrate( currentCrateId )
-const currentCrate = computed( () => crateData.value?.data )
-
-const { data: tagsData, isLoading: tagsLoading } = useTagsList()
-const tagOptions = computed( () =>
-    ( tagsData.value?.data ?? [] ).map( ( t ) => ( {
-        label: t.name,
-        value: t.id,
-    } ) ),
-)
-
-const updateJunk      = useUpdateJunk()
-const deleteJunk      = useDeleteJunk()
-const uploadPhoto     = useUploadJunkPhoto()
-const deletePhoto     = useDeleteJunkPhoto()
-
-const loadError = computed( () => junkError.value || crateError.value )
-
-// Local form state — synced from server payload, edited locally, PATCHed on save.
-const form = ref( {
-    name:        '',
-    description: '',
-    quantity:    1,
-    unit:        'ea',
-    tags:        [],
-    crate_id:    null,
-} )
-
-watch(
+const {
     junk,
-    ( j ) => {
-        if ( !j ) return
-        form.value = {
-            name:        j.name        || '',
-            description: j.description || '',
-            quantity:    j.quantity    || 1,
-            unit:        j.unit        || 'ea',
-            tags:        ( j.tags || [] ).map( ( t ) => t.id ),
-            crate_id:    j.crate_id,
-        }
-    },
-    { immediate: true },
-)
+    currentCrate,
+    tagOptions,
+    tagsLoading,
+    loadError,
+    form,
+    isDirty,
+    saving,
+    errorMessage: editError,
+    onSave,
+    confirmDelete,
+    openCratePicker,
+} = useJunkEdit( junkId )
 
-const isDirty = computed( () => {
-    if ( !junk.value ) return false
-    const j = junk.value
-    if ( form.value.name        !== ( j.name        || '' ) ) return true
-    if ( form.value.description !== ( j.description || '' ) ) return true
-    if ( form.value.quantity    !== ( j.quantity    || 1 ) )  return true
-    if ( form.value.unit        !== ( j.unit        || 'ea' ) ) return true
-    if ( form.value.crate_id    !== j.crate_id )              return true
-    const serverTagIds = ( j.tags || [] ).map( ( t ) => t.id ).sort().join( ',' )
-    const localTagIds  = [ ...form.value.tags ].sort().join( ',' )
-    if ( serverTagIds !== localTagIds ) return true
-    return false
-} )
+const {
+    photos,
+    addingPhoto,
+    uploadingPhoto,
+    uploadFile,
+    errorMessage: photoError,
+    cameraSupported,
+    cameraError,
+    streaming,
+    videoEl,
+    deviceOptions,
+    deviceId,
+    openAddPhoto,
+    closeAddPhoto,
+    captureAndUpload,
+    onFileSelected,
+    confirmRemovePhoto,
+    startCamera,
+    stopCamera,
+    restartIfStreaming,
+} = useJunkPhotoEdit( junkId )
 
-const saving      = ref( false )
-const submitError = ref( null )
-
-async function onSave () {
-    saving.value      = true
-    submitError.value = null
-    try {
-        await updateJunk.mutateAsync( {
-            id:      junkId.value,
-            payload: { ...form.value },
-        } )
-    }
-    catch ( err ) {
-        submitError.value = err?.body?.error?.message || err.message || 'Save failed'
-    }
-    finally {
-        saving.value = false
-    }
-}
-
-function confirmDelete () {
-    $q.dialog( {
-        title:     'Delete Junk',
-        message:   `Delete "${ junk.value.name }"? This cannot be undone.`,
-        cancel:    true,
-        persistent: true,
-    } ).onOk( async () => {
-        try {
-            await deleteJunk.mutateAsync( junkId.value )
-            router.replace( '/junk' )
-        }
-        catch ( err ) {
-            submitError.value = err?.body?.error?.message || err.message || 'Delete failed'
-        }
-    } )
-}
-
-function confirmRemovePhoto ( photo ) {
-    $q.dialog( {
-        title:     'Remove photo',
-        message:   'Remove this photo? This cannot be undone.',
-        cancel:    true,
-        persistent: true,
-    } ).onOk( async () => {
-        try {
-            await deletePhoto.mutateAsync( {
-                junkId:  junkId.value,
-                photoId: photo.id,
-            } )
-        }
-        catch ( err ) {
-            submitError.value = err?.body?.error?.message || err.message || 'Remove failed'
-        }
-    } )
-}
-
-function openCratePicker () {
-    $q.dialog( { component: CratePickerDialog } )
-        .onOk( ( picked ) => {
-            form.value.crate_id = picked.id
-        } )
-}
+const bannerError = computed( () => editError.value || photoError.value )
 
 function goBack () {
     if ( window.history.length > 1 ) router.back()
     else router.replace( '/junk' )
 }
-
-// --- Add-photo panel (inline camera + file upload) ---
-
-const addingPhoto    = ref( false )
-const uploadingPhoto = ref( false )
-const uploadFile     = ref( null )
-
-const {
-    videoEl,
-    streaming,
-    error: cameraError,
-    devices,
-    deviceId,
-    supported: cameraSupported,
-    startCamera,
-    stopCamera,
-    capture,
-    clearCapture,
-    restartIfStreaming,
-} = useCamera()
-
-const deviceOptions = computed( () =>
-    devices.value.map( ( d, i ) => ( {
-        label: d.label || `Camera ${ i + 1 }`,
-        value: d.deviceId,
-    } ) ),
-)
-
-function openAddPhoto () {
-    addingPhoto.value = true
-}
-
-function closeAddPhoto () {
-    addingPhoto.value = false
-    stopCamera()
-    uploadFile.value = null
-}
-
-async function captureAndUpload () {
-    const blob = await capture()
-    if ( !blob ) return
-    uploadingPhoto.value = true
-    try {
-        await uploadPhoto.mutateAsync( {
-            junkId:   junkId.value,
-            blob,
-            fileName: 'capture.webp',
-        } )
-        clearCapture()
-    }
-    catch ( err ) {
-        submitError.value = err?.body?.error?.message || err.message || 'Upload failed'
-    }
-    finally {
-        uploadingPhoto.value = false
-    }
-}
-
-async function onFileSelected ( file ) {
-    if ( !file ) return
-    uploadingPhoto.value = true
-    try {
-        await uploadPhoto.mutateAsync( {
-            junkId:   junkId.value,
-            blob:     file,
-            fileName: file.name,
-        } )
-        uploadFile.value = null
-    }
-    catch ( err ) {
-        submitError.value = err?.body?.error?.message || err.message || 'Upload failed'
-    }
-    finally {
-        uploadingPhoto.value = false
-    }
-}
-
-onBeforeUnmount( () => {
-    stopCamera()
-} )
 </script>
 
 <style scoped>
