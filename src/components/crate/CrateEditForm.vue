@@ -4,7 +4,7 @@
         v-model="form.name"
         label="Name *"
         autofocus
-        :rules="[ val => !!val || 'Name is required' ]"
+        :rules="nameRules"
     />
 
     <SelectInput
@@ -51,6 +51,8 @@ const props = defineProps( {
 const emit = defineEmits( [ 'saved', 'cancel' ] )
 
 const isEdit = computed( () => !!props.crate )
+
+const nameRules = [ ( val ) => !!val || 'Name is required' ]
 
 const {
     form,

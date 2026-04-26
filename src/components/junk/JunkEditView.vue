@@ -33,7 +33,7 @@
             :saving="saving"
             :error-message="errorMessage"
             @save="onSave"
-            @delete="confirmDelete( () => router.replace( '/junk' ) )"
+            @delete="onDelete"
         />
     </template>
 </q-page>
@@ -68,5 +68,9 @@ const {
 function goBack () {
     if ( window.history.length > 1 ) router.back()
     else router.replace( '/junk' )
+}
+
+function onDelete () {
+    confirmDelete( () => router.replace( '/junk' ) )
 }
 </script>

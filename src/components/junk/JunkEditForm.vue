@@ -3,7 +3,7 @@
     <TextInput
         v-model="form.name"
         label="Name"
-        :rules="[ val => !!val || 'Name is required' ]"
+        :rules="nameRules"
     />
 
     <TextareaInput
@@ -82,4 +82,6 @@ defineProps( {
 } )
 
 const emit = defineEmits( [ 'save', 'delete' ] )
+
+const nameRules = [ ( val ) => !!val || 'Name is required' ]
 </script>

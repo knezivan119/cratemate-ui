@@ -12,14 +12,14 @@
                 label="Email"
                 type="email"
                 autocomplete="email"
-                :rules="[ ( val ) => !!val || 'Email is required' ]"
+                :rules="emailRules"
             />
             <TextInput
                 v-model="form.password"
                 label="Password"
                 type="password"
                 autocomplete="current-password"
-                :rules="[ ( val ) => !!val || 'Password is required' ]"
+                :rules="passwordRules"
             />
             <q-banner v-if="errorMessage" rounded class="bg-negative text-white">
                 {{ errorMessage }}
@@ -43,4 +43,7 @@ import { useLogin } from 'src/uses/loginUse'
 import TextInput from 'src/components/input/TextInput.vue'
 
 const { form, loading, errorMessage, submit } = useLogin()
+
+const emailRules    = [ ( val ) => !!val || 'Email is required' ]
+const passwordRules = [ ( val ) => !!val || 'Password is required' ]
 </script>
