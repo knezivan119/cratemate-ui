@@ -113,4 +113,14 @@ ESLint enforces this via `space-in-parens`, `array-bracket-spacing`, `object-cur
 
 ## Current State
 
-See `../platform/progress.md` for the workspace-wide snapshot. UI side: Sanctum login wired, TanStack Vue Query against the API, Crates and Junk pages with CRUD dialogs, camera capture composable in place.
+See `../platform/progress.md` for the workspace-wide snapshot.
+
+**Headline shape:**
+- Pages are 5-line route shells; all real work in view/list/form components organised by domain folder (`components/{auth,crate,junk,input}/`).
+- Logic in `src/uses/*Use.js` composables (8 of them); SFCs are templates + thin orchestration.
+- Routes-driven nav: `routes.js` carries `meta: { label, icon, sidebar }`; `MainLayout` iterates.
+- Input wrapper layer with `cols` prop and shared defaults (`defaults/inputDefault.js`).
+- Domain widgets take whole domain objects (`<CrateTypeAvatar :crate="crate" />`).
+- Vitest + happy-dom test suite — **64 composable tests** pass via `npm run test`.
+
+**Cross-cutting rules** live in `../docs/rules.md` (project-agnostic) and as durable memories under `~/.claude/projects/.../memory/feedback_*.md`. Read those before refactoring patterns; they capture decisions about naming, formatting, layout, prop boundaries, etc., that apply everywhere.
