@@ -15,9 +15,17 @@ const model = defineModel()
 const attrs = useAttrs()
 
 const props = defineProps( {
-    cols: { type: [ String, Number ], default: 12 },
+    cols: {
+        type:    [ String, Number ],
+        default: 12,
+    },
 } )
 
 const rootClasses = computed( () => [ 'select-input', `col-${ props.cols }` ] )
-const bindings    = computed( () => ( { ...inputDefault, 'emit-value': true, 'map-options': true, ...attrs } ) )
+const bindings    = computed( () => ( {
+    ...inputDefault,
+    'emit-value':  true,
+    'map-options': true,
+    ...attrs,
+} ) )
 </script>

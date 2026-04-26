@@ -15,7 +15,10 @@ const model = defineModel()
 const attrs = useAttrs()
 
 const props = defineProps( {
-    cols: { type: [ String, Number ], default: 12 },
+    cols: {
+        type:    [ String, Number ],
+        default: 12,
+    },
 } )
 
 // Coerce the DOM string back to a Number (or null when blank), so callers always
@@ -28,5 +31,9 @@ const proxy = computed( {
 } )
 
 const rootClasses = computed( () => [ 'number-input', `col-${ props.cols }` ] )
-const bindings    = computed( () => ( { ...inputDefault, type: 'number', ...attrs } ) )
+const bindings    = computed( () => ( {
+    ...inputDefault,
+    type: 'number',
+    ...attrs,
+} ) )
 </script>

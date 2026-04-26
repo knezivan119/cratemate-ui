@@ -32,7 +32,10 @@ import CrateTypeAvatar from 'src/components/crate/CrateTypeAvatar.vue'
 
 // v-model on the crate id — anyone with a crate-id ref can drop this widget in
 // and get "show current crate + change via picker dialog" out of the box.
-const crateId = defineModel( { type: String, default: null } )
+const crateId = defineModel( {
+    type:    String,
+    default: null,
+} )
 
 const $q = useQuasar()
 
@@ -41,9 +44,10 @@ const { data } = useCrate( crateIdRef )
 const currentCrate = computed( () => data.value?.data )
 
 function openPicker () {
-    $q.dialog( { component: CratePickerDialog } )
-        .onOk( ( picked ) => {
-            if ( picked?.id ) crateId.value = picked.id
-        } )
+    $q.dialog( {
+        component: CratePickerDialog,
+    } ).onOk( ( picked ) => {
+        if ( picked?.id ) crateId.value = picked.id
+    } )
 }
 </script>

@@ -153,13 +153,14 @@ function select () {
 function openCreateInPlace () {
     $q.dialog( {
         component: CrateFormDialog,
-        componentProps: { parentId: currentId.value },
+        componentProps: {
+            parentId: currentId.value,
+        },
+    } ).onOk( ( created ) => {
+        if ( created?.id ) {
+            drillInto( created )
+        }
     } )
-        .onOk( ( created ) => {
-            if ( created?.id ) {
-                drillInto( created )
-            }
-        } )
 }
 </script>
 

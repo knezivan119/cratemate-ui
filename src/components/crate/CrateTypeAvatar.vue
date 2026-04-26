@@ -16,9 +16,18 @@ import { iconForType } from 'src/data/crateTypeData'
 // Accepts either the whole crate (preferred — caller doesn't pre-extract) or
 // just a type string when that's all the caller has.
 const props = defineProps( {
-    crate: { type: Object, default: null },
-    type:  { type: String, default: null },
-    size:  { type: String, default: '3rem' },
+    crate: {
+        type:    Object,
+        default: null,
+    },
+    type: {
+        type:    String,
+        default: null,
+    },
+    size: {
+        type:    String,
+        default: '3rem',
+    },
 } )
 
 const typeKey = computed( () => props.crate?.type ?? props.type )

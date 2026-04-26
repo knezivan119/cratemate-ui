@@ -72,8 +72,10 @@ export function useJunkEdit ( junkId ) {
         errorMessage.value = null
         try {
             await updateJunk.mutateAsync( {
-                id:      junkId.value,
-                payload: { ...form.value },
+                id: junkId.value,
+                payload: {
+                    ...form.value,
+                },
             } )
         }
         catch ( err ) {

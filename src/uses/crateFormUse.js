@@ -31,8 +31,10 @@ export function useCrateForm ( { crate, parentId, onSaved } ) {
         try {
             const result = crate.value
                 ? await updateCrate.mutateAsync( {
-                    id:      crate.value.id,
-                    payload: { ...form },
+                    id: crate.value.id,
+                    payload: {
+                        ...form,
+                    },
                 } )
                 : await createCrate.mutateAsync( {
                     ...form,

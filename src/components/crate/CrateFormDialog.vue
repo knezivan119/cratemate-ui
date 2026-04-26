@@ -23,8 +23,14 @@ import { useDialogPluginComponent } from 'quasar'
 import CrateEditForm from 'src/components/crate/CrateEditForm.vue'
 
 const props = defineProps( {
-    crate:    { type: Object, default: null },
-    parentId: { type: String, default: null },
+    crate: {
+        type:    Object,
+        default: null,
+    },
+    parentId: {
+        type:    String,
+        default: null,
+    },
 } )
 
 defineEmits( [ ...useDialogPluginComponent.emits ] )

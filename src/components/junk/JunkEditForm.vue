@@ -69,14 +69,32 @@ import SelectInput   from 'src/components/input/SelectInput.vue'
 
 // `form` is the shared edit-form object owned by the page-level composable.
 // Two-way bound so child Inputs can mutate fields directly via v-model.
-const form = defineModel( 'form', { type: Object, required: true } )
+const form = defineModel( 'form', {
+    type:     Object,
+    required: true,
+} )
 
 defineProps( {
-    tagOptions:   { type: Array,   default: () => [] },
-    tagsLoading:  { type: Boolean, default: false },
-    isDirty:      { type: Boolean, default: false },
-    saving:       { type: Boolean, default: false },
-    errorMessage: { type: String,  default: null },
+    tagOptions: {
+        type:    Array,
+        default: () => [],
+    },
+    tagsLoading: {
+        type:    Boolean,
+        default: false,
+    },
+    isDirty: {
+        type:    Boolean,
+        default: false,
+    },
+    saving: {
+        type:    Boolean,
+        default: false,
+    },
+    errorMessage: {
+        type:    String,
+        default: null,
+    },
 } )
 
 const emit = defineEmits( [ 'save', 'delete' ] )

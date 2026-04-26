@@ -10,28 +10,41 @@
 //   sidebar     — include in MainLayout's left drawer
 const routes = [
     {
-        path: '/login',
-        name: 'login',
+        path:      '/login',
+        name:      'login',
         component: () => import( 'pages/LoginPage.vue' ),
-        meta: { public: true },
+        meta: {
+            public: true,
+        },
     },
 
     {
-        path: '/',
+        path:      '/',
         component: () => import( 'layouts/MainLayout.vue' ),
-        meta: { requiresAuth: true },
+        meta: {
+            requiresAuth: true,
+        },
         children: [
             {
                 path:      '',
                 name:      'dashboard',
                 component: () => import( 'pages/DashboardPage.vue' ),
-                meta: { label: 'Dashboard', icon: 'dashboard', sidebar: true, exact: true },
+                meta: {
+                    label:   'Dashboard',
+                    icon:    'dashboard',
+                    sidebar: true,
+                    exact:   true,
+                },
             },
             {
                 path:      'crates',
                 name:      'crates',
                 component: () => import( 'pages/CratesPage.vue' ),
-                meta: { label: 'Crates', icon: 'inventory_2', sidebar: true },
+                meta: {
+                    label:   'Crates',
+                    icon:    'inventory_2',
+                    sidebar: true,
+                },
             },
             {
                 path:      'crates/:id',
@@ -42,7 +55,11 @@ const routes = [
                 path:      'junk',
                 name:      'junk',
                 component: () => import( 'pages/JunkPage.vue' ),
-                meta: { label: 'Junk', icon: 'widgets', sidebar: true },
+                meta: {
+                    label:   'Junk',
+                    icon:    'widgets',
+                    sidebar: true,
+                },
             },
             {
                 path:      'junk/:id',

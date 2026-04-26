@@ -15,9 +15,17 @@ const model = defineModel()
 const attrs = useAttrs()
 
 const props = defineProps( {
-    cols: { type: [ String, Number ], default: 12 },
+    cols: {
+        type:    [ String, Number ],
+        default: 12,
+    },
 } )
 
 const rootClasses = computed( () => [ 'textarea-input', `col-${ props.cols }` ] )
-const bindings    = computed( () => ( { ...inputDefault, type: 'textarea', autogrow: true, ...attrs } ) )
+const bindings    = computed( () => ( {
+    ...inputDefault,
+    type:     'textarea',
+    autogrow: true,
+    ...attrs,
+} ) )
 </script>

@@ -67,24 +67,50 @@ const {
 
 const rows = computed( () => junkResponse.value?.data ?? [] )
 const meta = computed( () => junkResponse.value?.meta ?? {
-    page: 1,
-    per_page: 15,
-    total: 0,
+    page:      1,
+    per_page:  15,
+    total:     0,
     last_page: 1,
 } )
 
 const columns = [
-    { name: 'thumb', label: '', field: 'thumb', align: 'left' },
-    { name: 'name', label: 'Name', field: 'name', align: 'left', sortable: true },
-    { name: 'description', label: 'Description', field: 'description', align: 'left' },
-    { name: 'quantity', label: 'Qty', field: ( row ) => `${ row.quantity } ${ row.unit || 'ea' }`, align: 'right' },
-    { name: 'status', label: 'Status', field: 'status', align: 'left' },
+    {
+        name:  'thumb',
+        label: '',
+        field: 'thumb',
+        align: 'left',
+    },
+    {
+        name:     'name',
+        label:    'Name',
+        field:    'name',
+        align:    'left',
+        sortable: true,
+    },
+    {
+        name:  'description',
+        label: 'Description',
+        field: 'description',
+        align: 'left',
+    },
+    {
+        name:  'quantity',
+        label: 'Qty',
+        field: ( row ) => `${ row.quantity } ${ row.unit || 'ea' }`,
+        align: 'right',
+    },
+    {
+        name:  'status',
+        label: 'Status',
+        field: 'status',
+        align: 'left',
+    },
 ]
 
 const tablePagination = computed( () => ( {
-    page: meta.value.page,
+    page:        meta.value.page,
     rowsPerPage: meta.value.per_page,
-    rowsNumber: meta.value.total,
+    rowsNumber:  meta.value.total,
 } ) )
 
 function onRequest ( props ) {

@@ -70,7 +70,9 @@ const errorMessage = computed( () => error.value?.message || 'Failed to load cra
 function openAdd () {
     $q.dialog( {
         component: CrateFormDialog,
-        componentProps: { parentId: null },
+        componentProps: {
+            parentId: null,
+        },
     } )
 }
 </script>

@@ -44,8 +44,14 @@ import TextareaInput from 'src/components/input/TextareaInput.vue'
 import SelectInput   from 'src/components/input/SelectInput.vue'
 
 const props = defineProps( {
-    crate:    { type: Object, default: null },
-    parentId: { type: String, default: null },
+    crate: {
+        type:    Object,
+        default: null,
+    },
+    parentId: {
+        type:    String,
+        default: null,
+    },
 } )
 
 const emit = defineEmits( [ 'saved', 'cancel' ] )

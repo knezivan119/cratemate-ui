@@ -29,13 +29,22 @@ export function useCamera () {
 
     function buildConstraints () {
         const video = {
-            width:  { ideal: REQUESTED_WIDTH },
-            height: { ideal: REQUESTED_HEIGHT },
+            width: {
+                ideal: REQUESTED_WIDTH,
+            },
+            height: {
+                ideal: REQUESTED_HEIGHT,
+            },
         }
         if ( deviceId.value ) {
-            video.deviceId = { exact: deviceId.value }
+            video.deviceId = {
+                exact: deviceId.value,
+            }
         }
-        return { video, audio: false }
+        return {
+            video,
+            audio: false,
+        }
     }
 
     async function enumerateDevices () {
