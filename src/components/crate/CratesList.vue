@@ -1,5 +1,5 @@
 <template>
-<q-page padding>
+<q-page padding class="crates-list">
     <div class="row items-center q-mb-md">
         <div class="text-h5">Crates</div>
     </div>

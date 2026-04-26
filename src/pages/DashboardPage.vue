@@ -1,5 +1,5 @@
 <template>
-<q-page padding>
+<q-page padding class="dashboard-page">
     <div class="text-h4 q-mb-md">Dashboard</div>
     <p class="text-grey-7">Welcome to the dashboard.</p>
 </q-page>

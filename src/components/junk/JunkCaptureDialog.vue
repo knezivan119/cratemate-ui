@@ -5,7 +5,7 @@
     :maximized="isMobile"
     @hide="onDialogHide"
 >
-    <q-card class="column no-wrap" :class="{ 'desktop-card': !isMobile }">
+    <q-card class="junk-capture-dialog column no-wrap" :class="{ 'desktop-card': !isMobile }">
         <q-toolbar class="bg-primary text-white">
             <q-toolbar-title class="text-subtitle1">
                 Add Junk to {{ crateName || '…' }}

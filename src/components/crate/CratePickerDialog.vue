@@ -4,7 +4,7 @@
     :maximized="isMobile"
     @hide="onDialogHide"
 >
-    <q-card class="column no-wrap" :class="{ 'desktop-card': !isMobile }">
+    <q-card class="crate-picker-dialog column no-wrap" :class="{ 'desktop-card': !isMobile }">
         <q-toolbar class="bg-primary text-white">
             <q-btn
                 flat

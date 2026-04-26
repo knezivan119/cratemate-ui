@@ -87,6 +87,10 @@ ESLint enforces this via `space-in-parens`, `array-bracket-spacing`, `object-cur
 
 **Templates stay clean.** Spread v-bind objects, inline lambdas, and validation arrays belong in script setup as named computeds/consts/functions. Templates should reference simple identifiers, not parse expressions. See `feedback_clean_templates` memory for the full rule.
 
+**No inline `style="..."` and every component gets a filename class.** Inline styles only when the value is genuinely dynamic per-instance and can't be expressed via classes. The default is CSS classes — Quasar utilities for spacing/colour/text, scoped per-component classes for everything else. Each component's visible-root element gets a kebab-case class matching its filename (`SelectInput.vue` → `class="select-input"`, `CrateFormDialog.vue` → `class="crate-form-dialog"`). Makes DevTools scannable and gives `<style scoped>` a stable hook.
+
+**Grid-friendly wrappers expose a `cols` prop (default 12).** Input wrappers (`TextInput`, `SelectInput`, etc.) take `cols` and apply `col-${cols}` to their root. Callers say `<NumberInput cols="6" />` instead of wrapping in a `<div class="col-6">`. Parent declares the row (e.g. `<div class="row q-col-gutter-md">`); children specify their own span via the prop.
+
 ## Architecture
 
 - `src/router/routes.js` — **source of truth for navigation**. Each route carries `meta: { label, icon, sidebar, ... }`. Sidebars/menus iterate this list rather than maintain their own link tables.

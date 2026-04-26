@@ -1,5 +1,9 @@
 <template>
-<q-input v-bind="bindings" v-model="proxy" />
+<q-input
+    v-bind="bindings"
+    v-model="proxy"
+    :class="rootClasses"
+/>
 </template>
 
 <script setup>
@@ -10,6 +14,10 @@ defineOptions( { inheritAttrs: false } )
 const model = defineModel()
 const attrs = useAttrs()
 
+const props = defineProps( {
+    cols: { type: [ String, Number ], default: 12 },
+} )
+
 // Coerce the DOM string back to a Number (or null when blank), so callers always
 // see a numeric model value without having to add v-model.number.
 const proxy = computed( {
@@ -19,5 +27,6 @@ const proxy = computed( {
     },
 } )
 
-const bindings = computed( () => ( { ...inputDefault, type: 'number', ...attrs } ) )
+const rootClasses = computed( () => [ 'number-input', `col-${ props.cols }` ] )
+const bindings    = computed( () => ( { ...inputDefault, type: 'number', ...attrs } ) )
 </script>

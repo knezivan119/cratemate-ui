@@ -1,5 +1,5 @@
 <template>
-<q-card flat bordered>
+<q-card flat bordered class="junk-crate-widget">
     <q-card-section class="row items-center q-py-sm">
         <CrateTypeAvatar
             :crate="currentCrate"

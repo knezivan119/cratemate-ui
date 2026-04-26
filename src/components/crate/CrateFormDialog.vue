@@ -1,6 +1,6 @@
 <template>
 <q-dialog ref="dialogRef" @hide="onDialogHide" persistent>
-    <q-card style="min-width: 20rem; max-width: 95vw; width: 30rem">
+    <q-card class="crate-form-dialog">
         <q-card-section>
             <div class="text-h6">{{ isEdit ? 'Edit Crate' : 'New Crate' }}</div>
         </q-card-section>
@@ -33,3 +33,11 @@ const { dialogRef, onDialogHide, onDialogOK, onDialogCancel } = useDialogPluginC
 
 const isEdit = computed( () => !!props.crate )
 </script>
+
+<style scoped>
+.crate-form-dialog {
+    min-width: 20rem;
+    max-width: 95vw;
+    width: 30rem;
+}
+</style>

@@ -1,5 +1,5 @@
 <template>
-<q-page padding class="q-pb-xl">
+<q-page padding class="junk-edit-view q-pb-xl">
     <div class="row items-center q-mb-md">
         <q-btn
             flat

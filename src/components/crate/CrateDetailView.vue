@@ -1,5 +1,5 @@
 <template>
-<q-page padding class="q-pb-xl">
+<q-page padding class="crate-detail-view q-pb-xl">
     <div class="row items-center q-mb-md no-wrap">
         <q-btn
             flat
@@ -22,7 +22,7 @@
             aria-label="Crate actions"
         >
             <q-menu>
-                <q-list style="min-width: 13.75rem">
+                <q-list class="actions-list">
                     <q-item clickable v-close-popup @click="openEdit">
                         <q-item-section avatar><q-icon name="edit" /></q-item-section>
                         <q-item-section>Rename / Edit</q-item-section>
@@ -165,6 +165,9 @@ const {
 </script>
 
 <style scoped>
+.actions-list {
+    min-width: 13.75rem;
+}
 .junk-gallery {
     display: grid;
     grid-template-columns: repeat( auto-fill, minmax( 7.5rem, 1fr ) );

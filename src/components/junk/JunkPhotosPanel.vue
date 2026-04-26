@@ -1,5 +1,5 @@
 <template>
-<div>
+<div class="junk-photos-panel">
     <div class="text-subtitle2 text-grey-7 q-mb-xs">Photos</div>
     <div class="photos-grid q-mb-md">
         <div

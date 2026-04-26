@@ -1,5 +1,5 @@
 <template>
-<q-page padding>
+<q-page padding class="junk-list">
     <div class="row items-center q-mb-md">
         <div class="text-h5">Junk</div>
     </div>

@@ -1,5 +1,5 @@
 <template>
-<q-form @submit.prevent="onSubmit" class="q-gutter-md">
+<q-form @submit.prevent="onSubmit" class="crate-edit-form q-gutter-md">
     <TextInput
         v-model="form.name"
         label="Name *"

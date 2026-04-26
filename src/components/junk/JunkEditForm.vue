@@ -1,5 +1,5 @@
 <template>
-<q-form @submit.prevent="emit( 'save' )" class="q-gutter-md">
+<q-form @submit.prevent="emit( 'save' )" class="junk-edit-form q-gutter-md">
     <TextInput
         v-model="form.name"
         label="Name"
@@ -12,21 +12,19 @@
     />
 
     <div class="row q-col-gutter-md">
-        <div class="col-6">
-            <NumberInput
-                v-model="form.quantity"
-                label="Quantity"
-                min="1"
-            />
-        </div>
-        <div class="col-6">
-            <TextInput
-                v-model="form.unit"
-                label="Unit"
-                placeholder="ea"
-                maxlength="16"
-            />
-        </div>
+        <NumberInput
+            v-model="form.quantity"
+            label="Quantity"
+            min="1"
+            cols="6"
+        />
+        <TextInput
+            v-model="form.unit"
+            label="Unit"
+            placeholder="ea"
+            maxlength="16"
+            cols="6"
+        />
     </div>
 
     <SelectInput

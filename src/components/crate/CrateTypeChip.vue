@@ -1,5 +1,6 @@
 <template>
 <q-chip
+    class="crate-type-chip"
     :icon="meta.icon"
     :color="meta.colour"
     text-color="white"

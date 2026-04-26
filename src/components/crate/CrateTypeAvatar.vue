@@ -1,5 +1,6 @@
 <template>
 <q-avatar
+    class="crate-type-avatar"
     :color="meta.colour"
     text-color="white"
     :size="size"
