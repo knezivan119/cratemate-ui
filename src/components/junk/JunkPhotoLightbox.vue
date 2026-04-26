@@ -2,13 +2,11 @@
 <q-dialog
     ref="dialogRef"
     @hide="onDialogHide"
-    class="junk-photo-lightbox"
 >
-    <q-card class="lightbox-card">
-        <q-img
+    <q-card class="junk-photo-lightbox">
+        <img
             :src="photo?.url"
             :alt="photo?.file_name"
-            fit="contain"
             class="lightbox-image"
         />
         <q-btn
@@ -39,22 +37,27 @@ const { dialogRef, onDialogHide, onDialogCancel } = useDialogPluginComponent()
 </script>
 
 <style scoped>
-.lightbox-card {
-    background:  #000;
-    max-width:   95vw;
-    max-height:  95vh;
-    position:    relative;
-    overflow:    hidden;
+.junk-photo-lightbox {
+    background: #000;
+    position:   relative;
+    /* The card sizes itself to its content (the image). The image is the
+       sized element — see .lightbox-image below. */
 }
 .lightbox-image {
-    max-width:   95vw;
-    max-height:  95vh;
+    display:    block;
+    /* The image sizes to its natural dimensions, capped to the viewport so
+       it never overflows. q-dialog's outer wrapper centres it. */
+    max-width:  95vw;
+    max-height: 95vh;
+    width:      auto;
+    height:     auto;
+    object-fit: contain;
 }
 .close-button {
-    position:    absolute;
-    top:         0.5rem;
-    right:       0.5rem;
-    background:  rgba( 0, 0, 0, 0.5 );
-    color:       white;
+    position:   absolute;
+    top:        0.5rem;
+    right:      0.5rem;
+    background: rgba( 0, 0, 0, 0.5 );
+    color:      white;
 }
 </style>
