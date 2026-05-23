@@ -11,41 +11,19 @@
             @click="goBack"
         />
         <div class="text-h5 ellipsis">
-            {{ junk?.name || 'Loading…' }}
+            {{ title }}
         </div>
     </div>
 
-    <q-banner v-if="loadError" rounded class="bg-negative text-white q-mb-md">
-        {{ loadError.message || 'Failed to load' }}
-    </q-banner>
-
-    <template v-if="junk">
-        <JunkPhotosPanel :junk-id="junkId" />
-
-        <div class="text-subtitle2 text-grey-7 q-mb-xs">In</div>
-        <JunkCrateWidget v-model="form.crate_id" class="q-mb-lg" />
-
-        <JunkEditForm
-            v-model:form="form"
-            :tag-options="tagOptions"
-            :tags-loading="tagsLoading"
-            :is-dirty="isDirty"
-            :saving="saving"
-            :error-message="errorMessage"
-            @save="onSave"
-            @delete="onDelete"
-        />
-    </template>
+    <JunkEditCard :junk-id="junkId" @deleted="onDeleted" />
 </q-page>
 </template>
 
 <script setup>
 import { computed } from 'vue'
 import { useRouter } from 'vue-router'
-import { useJunkEdit } from 'src/uses/junkEditUse'
-import JunkPhotosPanel from 'src/components/junk/JunkPhotosPanel.vue'
-import JunkCrateWidget from 'src/components/junk/JunkCrateWidget.vue'
-import JunkEditForm    from 'src/components/junk/JunkEditForm.vue'
+import { useJunk } from 'src/queries/junkQuery'
+import JunkEditCard from 'src/components/junk/JunkEditCard.vue'
 
 const props = defineProps( {
     junkId: {
@@ -56,28 +34,16 @@ const props = defineProps( {
 
 const router = useRouter()
 
-// Composables expect a Ref<string>; props are values. Wrap at the boundary.
 const junkIdRef = computed( () => props.junkId )
-
-const {
-    junk,
-    tagOptions,
-    tagsLoading,
-    loadError,
-    form,
-    isDirty,
-    saving,
-    errorMessage,
-    onSave,
-    confirmDelete,
-} = useJunkEdit( junkIdRef )
+const { data } = useJunk( junkIdRef )
+const title = computed( () => data.value?.data?.name || 'Loading…' )
 
 function goBack () {
     if ( window.history.length > 1 ) router.back()
     else router.replace( '/junk' )
 }
 
-function onDelete () {
-    confirmDelete( () => router.replace( '/junk' ) )
+function onDeleted () {
+    router.replace( '/junk' )
 }
 </script>

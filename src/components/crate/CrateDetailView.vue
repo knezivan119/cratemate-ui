@@ -96,25 +96,12 @@
     <div v-if="!junkLoading && junkItems.length === 0" class="text-grey-7 q-mb-lg">
         Nothing here yet. Tap "Add Junk" below to start.
     </div>
-    <div v-else class="junk-gallery q-mb-lg">
-        <router-link
-            v-for="item in junkItems"
-            :key="item.id"
-            :to="`/junk/${ item.id }`"
-            class="gallery-cell"
-        >
-            <img
-                v-if="item.photos?.[ 0 ]?.thumb_url"
-                :src="item.photos[ 0 ].thumb_url"
-                :alt="item.name"
-                class="gallery-image"
-            />
-            <div v-else class="gallery-placeholder">
-                <q-icon name="image_not_supported" size="2rem" color="grey-5" />
-            </div>
-            <div class="gallery-overlay">{{ item.name }}</div>
-        </router-link>
-    </div>
+    <JunkGallery
+        v-else
+        :items="junkItems"
+        class="q-mb-lg"
+        @select="goToJunk"
+    />
 
     <q-page-sticky position="bottom" :offset="[ 0, 16 ]" expand>
         <div class="row q-col-gutter-sm full-width q-px-md">
@@ -145,10 +132,12 @@
 
 <script setup>
 import { computed } from 'vue'
+import { useRouter } from 'vue-router'
 import { useCrateEdit } from 'src/uses/crateEditUse'
 import CrateTypeAvatar from 'src/components/crate/CrateTypeAvatar.vue'
 import CrateTypeChip   from 'src/components/crate/CrateTypeChip.vue'
 import CrateNumber     from 'src/components/crate/CrateNumber.vue'
+import JunkGallery     from 'src/components/junk/JunkGallery.vue'
 
 const props = defineProps( {
     crateId: {
@@ -156,6 +145,8 @@ const props = defineProps( {
         required: true,
     },
 } )
+
+const router = useRouter()
 
 // Composables expect a Ref<string>; props are values. Wrap at the boundary.
 const crateIdRef = computed( () => props.crateId )
@@ -174,53 +165,14 @@ const {
     moveToRoot,
     confirmDelete,
 } = useCrateEdit( crateIdRef )
+
+function goToJunk ( item ) {
+    router.push( `/junk/${ item.id }` )
+}
 </script>
 
 <style scoped>
 .actions-list {
     min-width: 13.75rem;
-}
-.junk-gallery {
-    display: grid;
-    grid-template-columns: repeat( auto-fill, minmax( 7.5rem, 1fr ) );
-    gap: 0.5rem;
-}
-.gallery-cell {
-    position: relative;
-    aspect-ratio: 1 / 1;
-    border-radius: 0.375rem;
-    overflow: hidden;
-    background: #f4f4f4;
-    display: block;
-    text-decoration: none;
-    color: inherit;
-}
-.gallery-image {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    display: block;
-}
-.gallery-placeholder {
-    width: 100%;
-    height: 100%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    background: #ececec;
-}
-.gallery-overlay {
-    position: absolute;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background: rgba( 0, 0, 0, 0.6 );
-    color: #fff;
-    padding: 0.25rem 0.5rem;
-    font-size: 0.75rem;
-    line-height: 1.3;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
 }
 </style>

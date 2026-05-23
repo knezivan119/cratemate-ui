@@ -41,6 +41,13 @@ export function useCamera () {
                 exact: deviceId.value,
             }
         }
+        else {
+            // Prefer rear camera when no specific device picked. `ideal` (not `exact`)
+            // so devices with only a front camera (laptops) still work.
+            video.facingMode = {
+                ideal: 'environment',
+            }
+        }
         return {
             video,
             audio: false,

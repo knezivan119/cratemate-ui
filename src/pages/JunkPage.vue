@@ -1,7 +1,7 @@
 <template>
-<JunkList />
+<JunkListView />
 </template>
 
 <script setup>
-import JunkList from 'src/components/junk/JunkList.vue'
+import JunkListView from 'src/components/junk/JunkListView.vue'
 </script>

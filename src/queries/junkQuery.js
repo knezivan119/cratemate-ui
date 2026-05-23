@@ -1,5 +1,5 @@
 import { computed, unref } from 'vue'
-import { useQuery, useMutation, useQueryClient } from '@tanstack/vue-query'
+import { useQuery, useInfiniteQuery, useMutation, useQueryClient } from '@tanstack/vue-query'
 import { apiFetch } from 'src/boot/api'
 
 export const junkKeys = {
@@ -11,11 +11,18 @@ export const junkKeys = {
     detail:  ( id ) => [ ...junkKeys.details(), id ],
 }
 
-export function useJunkList ( page ) {
-    return useQuery( {
-        queryKey: computed( () => junkKeys.list( { page: page.value } ) ),
-        queryFn:  () => apiFetch( `/junk?page=${ page.value }` ),
-        placeholderData: ( previous ) => previous,
+// Infinite/cumulative junk list for the gallery on /junk. data.pages is an
+// array of API responses; flatten with pages.flatMap( p => p.data ).
+export function useJunkInfinite () {
+    return useInfiniteQuery( {
+        queryKey:         [ ...junkKeys.lists(), 'infinite' ],
+        queryFn:          ( { pageParam } ) => apiFetch( `/junk?page=${ pageParam }` ),
+        initialPageParam: 1,
+        getNextPageParam: ( lastPage ) => {
+            const meta = lastPage?.meta
+            if ( !meta ) return undefined
+            return meta.page < meta.last_page ? meta.page + 1 : undefined
+        },
     } )
 }
 

@@ -121,6 +121,6 @@ See `../platform/progress.md` for the workspace-wide snapshot.
 - Routes-driven nav: `routes.js` carries `meta: { label, icon, sidebar }`; `MainLayout` iterates.
 - Input wrapper layer with `cols` prop and shared defaults (`defaults/inputDefault.js`).
 - Domain widgets take whole domain objects (`<CrateTypeAvatar :crate="crate" />`).
-- Vitest + happy-dom test suite — **64 composable tests** pass via `npm run test`.
+- Vitest + happy-dom test suite — **79 composable tests** pass via `npm run test`.
 
 **Cross-cutting rules** live in `../docs/rules.md` (project-agnostic) and as durable memories under `~/.claude/projects/.../memory/feedback_*.md`. Read those before refactoring patterns; they capture decisions about naming, formatting, layout, prop boundaries, etc., that apply everywhere.

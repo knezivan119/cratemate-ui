@@ -128,4 +128,29 @@ describe( 'cameraUse', () => {
         const blob = await harness.result.capture()
         expect( blob ).toBeNull()
     } )
+
+    it( 'startCamera requests rear camera by default (facingMode environment)', async () => {
+        getUserMedia.mockResolvedValue( makeStream() )
+
+        await harness.result.startCamera()
+
+        const constraints = getUserMedia.mock.calls[ 0 ][ 0 ]
+        expect( constraints.video.facingMode ).toEqual( {
+            ideal: 'environment',
+        } )
+        expect( constraints.video.deviceId ).toBeUndefined()
+    } )
+
+    it( 'startCamera with explicit deviceId omits facingMode and pins deviceId', async () => {
+        getUserMedia.mockResolvedValue( makeStream() )
+
+        harness.result.deviceId.value = 'cam-front'
+        await harness.result.startCamera()
+
+        const constraints = getUserMedia.mock.calls[ 0 ][ 0 ]
+        expect( constraints.video.deviceId ).toEqual( {
+            exact: 'cam-front',
+        } )
+        expect( constraints.video.facingMode ).toBeUndefined()
+    } )
 } )
